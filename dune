@@ -1,0 +1,4 @@
+(executable
+  (name voqc)
+  (modules voqc)
+  (libraries voqc))

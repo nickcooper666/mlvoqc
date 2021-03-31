@@ -1,4 +1,3 @@
 (executable
-  (name voqc)
-  (modules voqc)
+  (name voqc-cli)
   (libraries voqc))

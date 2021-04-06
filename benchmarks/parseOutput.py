@@ -13,7 +13,7 @@ if __name__ == "__main__":
     oTime = None
     wTime = None
     for line in lines:
-        if line.startswith("Original") or line.startswith("Final"):
+        if line.startswith("I :"):
             category = line.split(":")[0].strip()
             resDict[category] = {}
             tokens = [x.strip() for x in line.split(":")[-1].split(",")]

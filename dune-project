@@ -1,6 +1,5 @@
 (lang dune 2.0)
 (name voqc)
-(version ~dev)
 
 (generate_opam_files true)
 

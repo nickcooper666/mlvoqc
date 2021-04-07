@@ -19,9 +19,10 @@ The simplest script is `run_voqc_artifact.sh`. This is also a good script to tes
 	DONE
 ##### [Wed Apr  7 19:14:09 EDT 2021] Running PyZX...
 	DONE
+    
 <formatted tables>
 ```
-On our test machine (a Macbook Pro running macOS Catalina with OCaml 4.10.0) this script takes about 15 minutes.
+On our test machine (a Macbook Pro running macOS Big Sur with OCaml 4.10.0) this script takes about 15 minutes.
 
 `./run_voqc.sh` will run VOQC, with various options, on *all* the benchmarks in VOQC-benchmarks. Some of the benchmarks are quite large, so this will take a while (~24 hours on our test machine). This script creates files Arithmetic_and_Toffoli_results.csv, PF_results.csv, and QFT_and_Adders.csv to summarize results.
 

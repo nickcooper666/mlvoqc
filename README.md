@@ -61,7 +61,7 @@ VOQC supports OpenQASM programs that use the following gates:
 * CCX, CCZ
 where n is an integer expression and f is a float expression. rzq is a non-standard gate that we have defined specifically for VOQC. rzq(num,den) performs a rotation about the z-axis by ((num /den) * pi) for integers num and den. VOQC currently does not support OpenQASM programs that use measurement.
 
-Documentation for the VOQC library (generated with [odoc](https://github.com/ocaml/odoc)) is available [here](https://inQWIRE.github.io/voqc).
+Documentation for the VOQC library (generated with [odoc](https://github.com/ocaml/odoc)) is available [here](https://inQWIRE.github.io/mlvoqc).
 
 ## Extraction
 

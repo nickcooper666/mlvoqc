@@ -73,7 +73,7 @@ To re-generate the extracted OCaml code (e.g. when you want to update to include
 
 In order to perform extraction, you will need to have Coq installed (`opam install coq`). Extraction has only been tested with Coq version 8.12.0.
 
-### Comments on Extraction
+*Notes*:
 
 For performance, we have decided to:
 * Extract Coq nat to OCaml int.
@@ -86,7 +86,7 @@ Perhaps more problematic, we have decided to extract Coq's axiomatized Reals (us
 
 ## Contributing
 
-Pull requests are welcome! But note that the code in `ml/extracted` should *only* be updated following the instructions in [Extraction](#extraction) above. If you are interested in developing verified optimizations for quantum circuits, then consider working from our Coq development in [inQWIRE/SQIR](https://github.com/inQWIRE/SQIR) instead.
+Pull requests are welcome! But note that the code in `ml/extracted` should *only* be updated following the instructions in [Extraction](#extraction) above. If you are interested in developing verified optimizations for quantum circuits, then consider working from our Coq development at [inQWIRE/SQIR](https://github.com/inQWIRE/SQIR) instead.
 
 ## Acknowledgements
 

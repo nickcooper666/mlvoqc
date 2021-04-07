@@ -1,4 +1,3 @@
-open Qreals
 open UnitaryListRepresentation
 
 module StandardGateSet :
@@ -44,11 +43,10 @@ val standard_to_RzQ : standard_ucom_l -> RzQGateSet.coq_RzQ_ucom_l
 
 val coq_RzQ_to_standard : RzQGateSet.coq_RzQ_ucom_l -> standard_ucom_l
 
-val decompose_to_cnot :
-  standard_ucom_l -> StandardGateSet.coq_Std_Unitary gate_list
+val decompose_to_cnot : standard_ucom_l -> standard_ucom_l
 
 val convert_to_ibm : standard_ucom_l -> standard_ucom_l
 
 val convert_to_rzq : standard_ucom_l -> standard_ucom_l
 
-val replace_rzq : standard_ucom_l -> StandardGateSet.coq_Std_Unitary gate_list
+val replace_rzq : standard_ucom_l -> standard_ucom_l

@@ -1,12 +1,3 @@
-open CXCancellation
-open ConnectivityGraph
-open GateCancellation
-open HadamardReduction
-open Layouts
-open NotPropagation
-open Optimize1qGates
-open RotationMerging
-open SimpleMapping
 open UnitaryListRepresentation
 
 type circ = StandardGateSet.standard_ucom_l
@@ -16,9 +7,9 @@ type gate_counts =
    int * int * int * int * int * int * int * int * int * int * int * 
    int
 
-type layout = qmap
+type layout
 
-type c_graph = (int * (int -> int -> int list)) * (int -> int -> bool)
+type c_graph
 
 val get_dim : c_graph -> int
 
@@ -28,15 +19,13 @@ val get_is_in_graph : c_graph -> int -> int -> bool
 
 val check_well_typed : circ -> int -> bool
 
-val convert_to_ibm : circ -> StandardGateSet.standard_ucom_l
+val convert_to_ibm : circ -> circ
 
-val convert_to_rzq : circ -> StandardGateSet.standard_ucom_l
+val convert_to_rzq : circ -> circ
 
-val replace_rzq :
-  circ -> StandardGateSet.StandardGateSet.coq_Std_Unitary gate_list
+val replace_rzq : circ -> circ
 
-val decompose_to_cnot :
-  circ -> StandardGateSet.StandardGateSet.coq_Std_Unitary gate_list
+val decompose_to_cnot : circ -> circ
 
 val count_I : circ -> int
 
@@ -106,8 +95,7 @@ val check_graph : c_graph -> bool
 
 val check_constraints : circ -> c_graph -> bool
 
-val simple_map :
-  circ -> layout -> c_graph -> StandardGateSet.standard_ucom_l * qmap
+val simple_map : circ -> layout -> c_graph -> circ * layout
 
 val make_tenerife : unit -> c_graph
 

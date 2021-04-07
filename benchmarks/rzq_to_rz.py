@@ -5,7 +5,16 @@ from qiskit.qasm import pi
 import ast
 import sys
 
-#Takes RZQ Gate in form rzq(num, den) and transforms into rz((num/den)*pi). Overwrites file input
+''' 
+Converts rzq(num, den) to rz((num/den)*pi). Overwrites input file.
+
+We need to use this instead of VOQC's built-in "replace_rzq" function because
+VOQC's version will convert e.g. rzq(5,4) to rz(3.926991) instead of rz((5/4)*pi).
+These two values are not the same (due to rounding) and PyZX will fail to 
+verfy their equality. This suggests that we should change VOQC's replace_rzq
+function to treat PI as symbolic... or at least recognize the easy cases where
+the parameter is a multiple of PI/4.
+'''
 def rzq_to_rz(fname_in):
     count =  0
     line1 = []

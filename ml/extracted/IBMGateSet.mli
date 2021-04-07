@@ -1,4 +1,3 @@
-open ChangeRotationBasis
 open UnitaryListRepresentation
 
 module IBMGateSet :

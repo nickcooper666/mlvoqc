@@ -11,7 +11,7 @@ currentTime=`date`
 filename='VOQC-benchmarks/PF/pf1_10.qasm'
 
 printf "${CYAN}[${currentTime}] Running VOQC on ${filename}${NOCOLOR}\n"
-(dune exec --root .. -- ./voqc.exe -i ${filename} -o out.qasm) &> /dev/null
+(dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> /dev/null
 printf "${CYAN}  Running translation validation...${NOCOLOR}\n"
 python3 rzq_to_rz.py out.qasm
 python3 verifyEquality.py ${filename} out.qasm

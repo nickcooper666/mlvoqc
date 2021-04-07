@@ -319,7 +319,9 @@ Extraction Implicit Main.layout_to_list [dim].
 Separate Extraction
   Main.check_well_typed Main.convert_to_ibm Main.convert_to_rzq 
   Main.replace_rzq Main.decompose_to_cnot Main.count_gates Main.total_gate_count
-  Main.count_clifford_rzq Main.count_gates_lcr Main.optimize_ibm
+  Main.count_clifford_rzq Main.count_gates_lcr Main.optimize_1q_gates 
+  Main.cx_cancellation Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
+  Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
   Main.check_layout Main.check_graph Main.check_constraints Main.simple_map
   Main.make_tenerife Main.make_lnn Main.make_lnn_ring Main.make_grid

@@ -4,6 +4,7 @@
 (generate_opam_files true)
 
 (source (github inQWIRE/mlvoqc))
+(documentation "https://inQWIRE.github.io/voqc")
 (license MIT)
 (authors "Kesha Hietala")
 (maintainers "kesha@cs.umd.edu")

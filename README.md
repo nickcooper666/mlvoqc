@@ -1,6 +1,6 @@
 # mlvoqc
 
-This repository contains OCaml code for running the VOQC quantum circuit compiler [1]. The `.ml` files in `ml/extracted` (excluding the files FMapAVL.ml, FSetAVL.ml, and OrderedTypeEx.ml) are *extracted* from the verified Coq definitions in `VOQC` directory of [inQWIRE/SQIR](https://github.com/inQWIRE/SQIR). FMapAVL.ml, FSetAVL.ml, and OrderedTypeEx.ml are simple handwritten wrappers around OCaml's map and set datatypes, allowing us to avoid extracting Coq's built-in definitions of maps and sets. The Qasm.ml file in `ml` contains (unverified) code for parsing OpenQASM files. All `.mli` files in are custom interfaces. For instructions on how to re-generate the extracted OCaml code from our Coq definitions see [Extraction](#extraction) below. 
+This repository contains OCaml code for running the VOQC quantum circuit compiler [1]. The `.ml` files in `ml/extracted` are *extracted* from the verified Coq definitions in `VOQC` directory of [inQWIRE/SQIR](https://github.com/inQWIRE/SQIR). For instructions on how to re-generate the extracted OCaml code from our Coq definitions see [Extraction](#extraction) below. 
 
 `voqc-cli.ml` in the top-level directory provides a simple command line interface for interacting with the VOQC compiler. Instructions for compiling and running `voqc-cli.ml` are given below. **However**, we recommend using our Python wrapper available in [inQWIRE/pyvoqc](https://github.com/inQWIRE/pyvoqc) instead. The pyvoqc repository also includes a tutorial.
 
@@ -8,7 +8,7 @@ Scripts to run VOQC on the benchmarks described in our paper are available in th
 
 ## Setup
 
-VOQC requires OCaml (version >= 4.08.1) and [opam](https://opam.ocaml.org/doc/Install.html). Once you have opam installed, follow the instructions below to set up your environment.
+VOQC requires OCaml (version >= 4.08.1), [opam](https://opam.ocaml.org/doc/Install.html), and dune. Once you have opam installed, follow the instructions below to set up your environment.
 ```
 # environment setup
 opam init
@@ -18,16 +18,12 @@ eval $(opam env)
 opam switch create voqc 4.10.0
 eval $(opam env)
 
-# check that you got the right version of OCaml
-which ocaml
-ocaml -version
-
-# list existing switches
-opam switch
+# install dune (needed to build VOQC)
+opam install dune
 ```
 
 *Notes*:
-* Depending on your system, you may need to replace 4.10.0 in the instructions above with something like "ocaml-base-compiler.4.10.0". Opam error messages and warnings tend to be informative, so if you run into trouble then make sure you read the console output.
+* Depending on your system, you may need to replace 4.10.0 in the instructions above with something like "ocaml-base-compiler.4.10.0". Opam error messages and warnings are typically informative, so if you run into trouble then make sure you read the console output.
 
 ## Installation
 
@@ -65,7 +61,7 @@ VOQC supports OpenQASM programs that use the following gates:
 * CCX, CCZ
 where n is an integer expression and f is a float expression. rzq is a non-standard gate that we have defined specifically for VOQC. rzq(num,den) performs a rotation about the z-axis by ((num /den) * pi) for integers num and den. VOQC currently does not support OpenQASM programs that use measurement.
 
-For additional detail about the functionality provided by VOQC, see the [API](API.md).
+Documentation for the VOQC library (generated with [odoc](https://github.com/ocaml/odoc)) is available [here](https://inQWIRE.github.io/voqc).
 
 ## Extraction
 

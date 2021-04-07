@@ -7,6 +7,7 @@ maintainer: ["kesha@cs.umd.edu"]
 authors: ["Kesha Hietala"]
 license: "MIT"
 homepage: "https://github.com/inQWIRE/mlvoqc"
+doc: "https://inQWIRE.github.io/voqc"
 bug-reports: "https://github.com/inQWIRE/mlvoqc/issues"
 depends: [
   "dune" {>= "2.0"}

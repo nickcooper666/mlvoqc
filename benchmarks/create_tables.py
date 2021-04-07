@@ -105,7 +105,7 @@ def outputTable3(voqc_dict, pyzx_dict):
     voqc_red = []
     for circuit in circuits:
         # orig is same in all dicts
-        orig = voqc_dict[circuit]["Orig. T"]
+        orig = str(int(voqc_dict[circuit]["Orig. Rzq"]) - int(voqc_dict[circuit]["Orig. Cliff"]))
         pyzx = pyzx_dict[circuit]["PyZX T"]
         voqc = str(int(voqc_dict[circuit]["VOQC Rzq"]) - int(voqc_dict[circuit]["VOQC Cliff"]))
         print("%s| %s\t\t%s\t\t%s" %(circuit.ljust(15), orig, pyzx, voqc))

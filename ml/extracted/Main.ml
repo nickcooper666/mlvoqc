@@ -384,38 +384,83 @@ let count_gates_lcr lcr n =
     (add_counts ln
       (scale_count cn ((-) n (Pervasives.succ (Pervasives.succ 0))))) rn
 
+(** val optimize_1q_gates : circ -> circ **)
+
+let optimize_1q_gates c =
+  StandardGateSet.coq_IBM_to_standard
+    (optimize_1q_gates (StandardGateSet.standard_to_IBM c))
+
+(** val cx_cancellation : circ -> circ **)
+
+let cx_cancellation c =
+  StandardGateSet.coq_IBM_to_standard
+    (cx_cancellation (StandardGateSet.standard_to_IBM c))
+
 (** val optimize_ibm : circ -> circ **)
 
 let optimize_ibm c =
   StandardGateSet.coq_IBM_to_standard
-    (cx_cancellation (optimize_1q_gates (StandardGateSet.standard_to_IBM c)))
+    (CXCancellation.cx_cancellation
+      (Optimize1qGates.optimize_1q_gates (StandardGateSet.standard_to_IBM c)))
+
+(** val not_propagation : circ -> circ **)
+
+let not_propagation c =
+  StandardGateSet.coq_RzQ_to_standard
+    (not_propagation (StandardGateSet.standard_to_RzQ c))
+
+(** val hadamard_reduction : circ -> circ **)
+
+let hadamard_reduction c =
+  StandardGateSet.coq_RzQ_to_standard
+    (hadamard_reduction (StandardGateSet.standard_to_RzQ c))
+
+(** val cancel_single_qubit_gates : circ -> circ **)
+
+let cancel_single_qubit_gates c =
+  StandardGateSet.coq_RzQ_to_standard
+    (cancel_single_qubit_gates (StandardGateSet.standard_to_RzQ c))
+
+(** val cancel_two_qubit_gates : circ -> circ **)
+
+let cancel_two_qubit_gates c =
+  StandardGateSet.coq_RzQ_to_standard
+    (cancel_two_qubit_gates (StandardGateSet.standard_to_RzQ c))
+
+(** val merge_rotations : circ -> circ **)
+
+let merge_rotations c =
+  StandardGateSet.coq_RzQ_to_standard
+    (merge_rotations (StandardGateSet.standard_to_RzQ c))
 
 (** val optimize_nam : circ -> circ **)
 
 let optimize_nam c =
   StandardGateSet.coq_RzQ_to_standard
-    (cancel_single_qubit_gates
-      (cancel_two_qubit_gates
-        (merge_rotations
-          (cancel_single_qubit_gates
-            (hadamard_reduction
-              (cancel_two_qubit_gates
-                (cancel_single_qubit_gates
-                  (cancel_two_qubit_gates
-                    (hadamard_reduction
-                      (not_propagation (StandardGateSet.standard_to_RzQ c)))))))))))
+    (GateCancellation.cancel_single_qubit_gates
+      (GateCancellation.cancel_two_qubit_gates
+        (RotationMerging.merge_rotations
+          (GateCancellation.cancel_single_qubit_gates
+            (HadamardReduction.hadamard_reduction
+              (GateCancellation.cancel_two_qubit_gates
+                (GateCancellation.cancel_single_qubit_gates
+                  (GateCancellation.cancel_two_qubit_gates
+                    (HadamardReduction.hadamard_reduction
+                      (NotPropagation.not_propagation
+                        (StandardGateSet.standard_to_RzQ c)))))))))))
 
 (** val optimize_nam_light : circ -> circ **)
 
 let optimize_nam_light c =
   StandardGateSet.coq_RzQ_to_standard
-    (cancel_single_qubit_gates
-      (hadamard_reduction
-        (cancel_two_qubit_gates
-          (cancel_single_qubit_gates
-            (cancel_two_qubit_gates
-              (hadamard_reduction
-                (not_propagation (StandardGateSet.standard_to_RzQ c))))))))
+    (GateCancellation.cancel_single_qubit_gates
+      (HadamardReduction.hadamard_reduction
+        (GateCancellation.cancel_two_qubit_gates
+          (GateCancellation.cancel_single_qubit_gates
+            (GateCancellation.cancel_two_qubit_gates
+              (HadamardReduction.hadamard_reduction
+                (NotPropagation.not_propagation
+                  (StandardGateSet.standard_to_RzQ c))))))))
 
 (** val optimize_nam_lcr : circ -> ((circ * circ) * circ) option **)
 

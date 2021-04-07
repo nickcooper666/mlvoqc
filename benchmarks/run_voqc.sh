@@ -7,6 +7,9 @@ CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NOCOLOR='\033[0m'
 
+# Special formatting for time output
+export TIMEFORMAT="Wallclock time: %R seconds"
+
 # Get files
 pf_filenames=( $(ls -d VOQC-benchmarks/PF/*.qasm) )
 Arithmetic_and_Toffoli_filenames=( $(ls -d VOQC-benchmarks/Arithmetic_and_Toffoli/*.qasm) )
@@ -63,7 +66,7 @@ echo""
 printf "${GREEN}##### Running on files in PF #####${NOCOLOR}\n"
 index=0
 > PF_results.csv
-echo "name,Orig. total,Orig. Rz,Orig. Cliff,Orig. H,Orig. X,Orig. CNOT,VOQC total,VOQC Rz,VOQC Cliff,VOQC H,VOQC X,VOQC CNOT,parse time,optimization time,write time" >> PF_results.csv
+echo "name,Orig. total,Orig. Rzq,Orig. Cliff,Orig. H,Orig. X,Orig. CX,VOQC total,VOQC Rzq,VOQC Cliff,VOQC H,VOQC X,VOQC CX,wallclock time" >> PF_results.csv
 for filename in "${pf_filenames[@]}"
 do
     program_name=`basename "$filename" .qasm`
@@ -71,20 +74,20 @@ do
     index=$((index+1))
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc.exe -i ${filename} -o out.qasm -n ${iter}) &> ${program_name}.txt
-    python parseOutput2.py ${program_name}.txt >> PF_results.csv
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-lcr ${iter}) &> ${program_name}.txt
+    python parseOutput.py ${program_name}.txt >> PF_results.csv
     rm -rf ${program_name}.txt
 done
 
 printf "${GREEN}##### Running on files in Arithmetic_and_Toffoli #####${NOCOLOR}\n"
 > Arithmetic_and_Toffoli_results.csv
-echo "name,Orig. total,Orig. Rz,Orig. T,Orig. H,Orig. X,Orig. CNOT,VOQC total,VOQC Rz,VOQC T,VOQC H,VOQC X,VOQC CNOT,parse time,optimization time,write time" >> Arithmetic_and_Toffoli_results.csv
+echo "name,Orig. total,Orig. Rzq,Orig. Cliff,Orig. H,Orig. X,Orig. CX,VOQC total,VOQC Rzq,VOQC Cliff,VOQC H,VOQC X,VOQC CX,wallclock time" >> Arithmetic_and_Toffoli_results.csv
 for filename in "${Arithmetic_and_Toffoli_filenames[@]}"
 do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc.exe -i ${filename} -o out.qasm) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> Arithmetic_and_Toffoli_results.csv
     rm -rf ${program_name}.txt
 done
@@ -92,13 +95,13 @@ done
 echo""
 printf "${GREEN}##### Running on files in QFT_and_Adders #####${NOCOLOR}\n"
 > QFT_and_Adders_results.csv
-echo "name,Orig. total,Orig. Rz,Orig. T,Orig. H,Orig. X,Orig. CNOT,VOQC total,VOQC Rz,VOQC T,VOQC H,VOQC X,VOQC CNOT,parse time,optimization time,write time" >> QFT_and_Adders_results.csv
+echo "name,Orig. total,Orig. Rzq,Orig. Cliff,Orig. H,Orig. X,Orig. CX,VOQC total,VOQC Rzq,VOQC Cliff,VOQC H,VOQC X,VOQC CX,wallclock time" >> QFT_and_Adders_results.csv
 for filename in "${Quipper_Adder_filenames[@]}"
 do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc.exe -i ${filename} -o out.qasm) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> QFT_and_Adders_results.csv
     rm -rf ${program_name}.txt
 done
@@ -108,7 +111,7 @@ do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc.exe -i ${filename} -o out.qasm -l) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-light) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> QFT_and_Adders_results.csv
     rm -rf ${program_name}.txt
 done

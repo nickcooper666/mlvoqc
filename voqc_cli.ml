@@ -4,6 +4,7 @@ open Voqc.Main
 
 (* Requested transformations will be applied in the following order:
    Nam optimization -> IBM optimization -> Mapping
+   The input program will always be converted to the RzQ gate set initially
    At most one mapping routine will be applied, the precedence is lnn > lnnring > grid > tenerife
 
    Usage:
@@ -28,7 +29,7 @@ let print_gc (gc : gate_counts) =
       (printf "I : %d, X : %d, Y : %d, Z : %d, H : %d, %!" i x y z h; 
        printf "S : %d, T : %d, Sdg : %d, Tdg : %d, Rx : %d, %!" s t sdg tdg rx; 
        printf "Ry : %d, Rz : %d, Rzq : %d, U1 : %d, U2 : %d, U3 : %d, %!" ry rz rzq u1 u2 u3; 
-       printf "CX : %d, CZ : %d, SWAP : %d, CCX : %d, CCZ : %d%!\n" cx cz swap ccx ccz) 
+       printf "CX : %d, CZ : %d, SWAP : %d, CCX : %d, CCZ : %d } %!\n" cx cz swap ccx ccz) 
 
 (* Print mapping layout *)
 let print_layout la n = List.iter (printf "%d ") (layout_to_list la n); printf "\n"
@@ -41,7 +42,7 @@ let run_mapping n dim c la cg = (* n = # qubits in prog, dim = # qubits on machi
     let _ = (printf "Input layout: "; print_layout la dim) in
     let (c',la') = simple_map c la cg in
     let gc = count_gates c' in
-    let _ = (printf "Input layout: "; print_layout la' dim) in
+    let _ = (printf "Output layout: "; print_layout la' dim) in
     let _ = printf "Gate counts after mapping (%d total):\n" (total_gate_count c') in
     let _ = print_gc gc in
     c'
@@ -93,22 +94,27 @@ then (
     | Some ((l,c0),r) -> 
         let inc = scale_count (count_gates c) !lcr in
         let outc = count_gates_lcr ((l,c0),r) !lcr in
-        let _ = printf "Gates required for n iterations of the original circuit:\n" in
+        let intot = !lcr * (total_gate_count c) in
+        let incliff = !lcr * (count_clifford_rzq c) in
+        let outtot = (total_gate_count l) + (!lcr - 2) * (total_gate_count c0) + (total_gate_count r) in
+        let outcliff = (count_clifford_rzq l) + (!lcr - 2) * (count_clifford_rzq c0) + (count_clifford_rzq r) in
+        let _ = printf "Original gate counts (for %d iterations) = { Total : %d, Rzq(Clifford) : %d, " !lcr intot incliff in
         let _ = print_gc inc in
-        let _ = printf "Gates required for n iterations of the optimized circuit:\n" in
+        let _ = printf "Final gate counts (for %d iterations) = { Total : %d, Rzq(Clifford) : %d, " !lcr outtot outcliff in
         print_gc outc
 ) else (
     let _ = if !optimnam && not !light then printf "Nam optimization enabled\n" else () in
     let _ = if !light then printf "Nam optimization (light) enabled\n" else () in
     let _ = if !optimibm then printf "IBM optimization enabled\n" else () in
+    let c = convert_to_rzq c in
     let inc = count_gates c in
-    let _ = printf "Input gate counts (%d total):\n" (total_gate_count c) in
+    let _ = printf "Original gate counts = { Total : %d, Rzq(Clifford) : %d, " (total_gate_count c) (count_clifford_rzq c) in
     let _ = print_gc inc in
     let c1 = if !optimnam && not !light then optimize_nam c else c in
     let c2 = if !light then optimize_nam_light c1 else c1 in
     let c3 = if !optimibm then optimize_ibm c2 else c2 in
     let outc = count_gates c3 in
-    let _ = printf "Gate counts after optimization (%d total):\n" (total_gate_count c3) in
+    let _ = printf "Final gate counts = { Total : %d, Rzq(Clifford) : %d, " (total_gate_count c3) (count_clifford_rzq c3) in
     let _ = print_gc outc in
     let c4 = if !lnn > 0 then (
                  let cg = make_lnn !lnn in

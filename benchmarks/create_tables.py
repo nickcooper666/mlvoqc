@@ -50,7 +50,7 @@ def geo_mean(nums):
 def outputGeomeanRuntimes(qiskit_dict, tket_dict, voqc_dict, pyzx_dict):
     qiskit_times = [float(x["time"].split("s")[0]) for x in qiskit_dict.values()]
     tket_times = [float(x["time"].split("s")[0]) for x in tket_dict.values()]
-    voqc_times = [float(x["optimization time"].split("s")[0]) for x in voqc_dict.values()]
+    voqc_times = [float(x["wallclock time"]) for x in voqc_dict.values()]
     pyzx_times = [float(x["time"].split("s")[0]) for x in pyzx_dict.values()]
     print("\n### Geometric mean runtimes over all 28 benchmarks\n")
     print("VOQC  | Qiskit  | tket  | PyZX")
@@ -94,6 +94,7 @@ def outputTable2(qiskit_dict, tket_dict, voqc_dict):
 #############################################################################################
 
 # Outputs Table 3 from the paper
+# For VOQC, T count is Rzq - Cliff
 def outputTable3(voqc_dict, pyzx_dict):
     print("\n\n#### Table 3: Reduced T-gate counts on Amy et al. benchmarks.\n")
     print("%s| Original\tPyZX\t\tVOQC" %("Name".ljust(15)))
@@ -106,7 +107,7 @@ def outputTable3(voqc_dict, pyzx_dict):
         # orig is same in all dicts
         orig = voqc_dict[circuit]["Orig. T"]
         pyzx = pyzx_dict[circuit]["PyZX T"]
-        voqc = voqc_dict[circuit]["VOQC T"]
+        voqc = str(int(voqc_dict[circuit]["VOQC Rzq"]) - int(voqc_dict[circuit]["VOQC Cliff"]))
         print("%s| %s\t\t%s\t\t%s" %(circuit.ljust(15), orig, pyzx, voqc))
         # Exclude these two benchmarks from averages
         if circuit != "csla_mux_3" and circuit != "qcla_mod_7":

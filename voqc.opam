@@ -10,12 +10,14 @@ homepage: "https://github.com/inQWIRE/mlvoqc"
 doc: "https://inQWIRE.github.io/mlvoqc"
 bug-reports: "https://github.com/inQWIRE/mlvoqc/issues"
 depends: [
-  "dune" {>= "2.0"}
+  "dune" {>= "2.7"}
+  "ocaml" {>= "4.08"}
   "openQASM"
   "zarith"
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"

@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.7)
 (name voqc)
 
 (generate_opam_files true)
@@ -14,5 +14,6 @@
  (synopsis "A verified optimizer for quantum circuits (VOQC)")
  (description "OCaml library for VOQC, a Verified Optimizer for Quantum Circuits")
  (depends
+  (ocaml (>= 4.08))
   openQASM
   zarith))

@@ -117,9 +117,22 @@ module Z =
 
   let max = Pervasives.max
 
+  (** val min : int -> int -> int **)
+
+  let min = Pervasives.min
+
   (** val abs : int -> int **)
 
   let abs = Pervasives.abs
+
+  (** val to_nat : int -> int **)
+
+  let to_nat z =
+    (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
+      (fun _ -> 0)
+      (fun p -> Pos.to_nat p)
+      (fun _ -> 0)
+      z
 
   (** val of_nat : int -> int **)
 

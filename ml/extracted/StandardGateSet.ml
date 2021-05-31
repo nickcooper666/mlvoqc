@@ -1,4 +1,3 @@
-open Qreals
 open UnitaryListRepresentation
 
 module StandardGateSet =
@@ -136,7 +135,7 @@ let standard_to_IBM_u = function
    | StandardGateSet.U_Ry r -> (IBMGateSet.coq_Ry r m) :: []
    | StandardGateSet.U_Rz r -> (IBMGateSet.coq_Rz r m) :: []
    | StandardGateSet.U_Rzq q ->
-     (IBMGateSet.coq_Rz (( *. ) (coq_Q2R q) Float.pi) m) :: []
+     (IBMGateSet.coq_Rz (( *. ) (Q.to_float q) Float.pi) m) :: []
    | StandardGateSet.U_U1 r -> (IBMGateSet.coq_U1 r m) :: []
    | StandardGateSet.U_U2 (r1, r2) -> (IBMGateSet.coq_U2 r1 r2 m) :: []
    | StandardGateSet.U_U3 (r1, r2, r3) -> (IBMGateSet.coq_U3 r1 r2 r3 m) :: []
@@ -371,7 +370,8 @@ let replace_rzq_u g = match g with
                          else if Q.equal q (Q.of_ints 7 4)
                               then (App1 (StandardGateSet.U_Tdg, m)) :: []
                               else (App1 ((StandardGateSet.U_Rz
-                                     (( *. ) (coq_Q2R q) Float.pi)), m)) :: []
+                                     (( *. ) (Q.to_float q) Float.pi)),
+                                     m)) :: []
    | _ -> g :: [])
 | _ -> g :: []
 

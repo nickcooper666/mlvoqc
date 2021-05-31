@@ -168,10 +168,6 @@ module Pos =
 
   let compare = fun x y -> if x=y then Eq else if x<y then Lt else Gt
 
-  (** val max : int -> int -> int **)
-
-  let max = Pervasives.max
-
   (** val eqb : int -> int -> bool **)
 
   let rec eqb p q =

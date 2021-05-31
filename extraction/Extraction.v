@@ -81,8 +81,7 @@ Extract Inlined Constant Qmult => "Q.mul".
 Extract Inlined Constant Qeq_bool => "Q.equal".
 Extract Inlined Constant Qle_bool => "Q.leq".
 Extract Inlined Constant inject_Z => "Q.of_int".
-Extract Inlined Constant Qnum => "(fun q -> Z.to_int (Q.num q))".
-Extract Inlined Constant Qden => "(fun q -> Z.to_int (Q.den q))".    
+Extract Inlined Constant Q2R => "Q.to_float".
 (* It's easier to extract these functions by hand.
    bound is used in RzQGateSet; it puts a rational q in the range [0,2) *)
 Extract Constant RzQGateSet.bound => 
@@ -147,8 +146,7 @@ Extraction Implicit HadamardReduction.apply_H_equivalence1 [dim].
 Extraction Implicit HadamardReduction.apply_H_equivalence2 [dim].
 Extraction Implicit HadamardReduction.apply_H_equivalence3 [dim].
 Extraction Implicit HadamardReduction.apply_H_equivalence4 [dim].
-Extraction Implicit HadamardReduction.apply_H_equivalence5 [dim].
-Extraction Implicit HadamardReduction.apply_H_equivalence [dim].
+Extraction Implicit HadamardReduction.H_equivalences [dim].
 Extraction Implicit HadamardReduction.apply_H_equivalences' [dim].
 Extraction Implicit HadamardReduction.hadamard_reduction [dim].
 
@@ -317,6 +315,7 @@ Extraction Implicit Main.layout_to_list [dim].
 
 (* Perform extraction. *)
 Separate Extraction
+  UnitaryListRepresentation.last_single_qubit_gate
   Main.check_well_typed Main.convert_to_ibm Main.convert_to_rzq 
   Main.replace_rzq Main.decompose_to_cnot Main.count_gates Main.total_gate_count
   Main.count_clifford_rzq Main.count_gates_lcr Main.optimize_1q_gates 

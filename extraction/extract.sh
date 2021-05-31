@@ -23,13 +23,14 @@ rm -f *.glob *.mli *.vo*
 # extract types like R and Q. We also use custom FSetAVL and FMapAVL files
 # (see ml/extracted), which are wrappers around OCaml's maps and sets.
 rm -f BinNums.ml ClassicalDedekindReals.ml ConstructiveCauchyReals.ml \
-      FMap* FSet* Int.ml List.ml MSet* Nat.ml Order* QArith_base.ml ROrderedType.ml \
-      Ratan.ml Rdefinitions.ml Rtrigo1.ml Rtrigo_def.ml Specif.ml ZArith_dec.ml
+      FMap* FSet* Int.ml List.ml MSet* Nat.ml Order* QArith_base.ml \
+      Ratan.ml Rdefinitions.ml Ring_theory.ml ROrderedType.ml Rtrigo1.ml \
+      Rtrigo_def.ml Specif.ml ZArith_dec.ml
 
 # Move remaining extracted files to the ml/extracted directory.
 mv Bin*.ml CXCancellation.ml ChangeRotationBasis.ml ConnectivityGraph.ml Datatypes.ml \
    GateCancellation.ml HadamardReduction.ml IBMGateSet.ml Layouts.ml Main.ml \
-   NotPropagation.ml Optimize1qGates.ml PeanoNat.ml Qreals.ml RotationMerging.ml \
+   NotPropagation.ml Optimize1qGates.ml PeanoNat.ml RotationMerging.ml \
    RzQGateSet.ml SimpleMapping.ml StandardGateSet.ml UnitaryListRepresentation.ml \
    ../ml/extracted
 

@@ -58,8 +58,8 @@ let rec optimize_1q_gates' l n acc =
                  | IBMGateSet.IBMGateSet.UIBM_CNOT -> Obj.magic __)
               | IBMGateSet.IBMGateSet.UIBM_CNOT -> Obj.magic __
             in
-            optimize_1q_gates' (List.append l1 l2) n' ((App1 (unew,
-              q)) :: acc)
+            optimize_1q_gates' ((App1 (unew, q)) :: (List.append l1 l2)) n'
+              acc
           | None -> optimize_1q_gates' t n' ((App1 (u, q)) :: acc))
        | _ -> optimize_1q_gates' t n' (g :: acc)))
     n

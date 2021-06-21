@@ -1,6 +1,7 @@
-## 0.2.1 (2021-05-29)
+## 0.2.1 (2021-06-21)
 
 - Updated to the most recent version of SQIR & extracted using Coq v8.13.2.
+- The only change in SQIR that impacts the behavior of mlvoqc is that Optimize1qGates now merges as many gates as possible instead of just two at a time.
 
 ## 0.2.0 (2021-04-07)
 

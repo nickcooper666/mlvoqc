@@ -86,14 +86,14 @@ let () =
     usage;
 if !inf = "" then printf "ERROR: Input filename (-i) required.\n" else 
 if !outf = "" then printf "ERROR: Output filename (-o) required.\n" else 
-let _ = printf "Input file: %s\nOutput file: %s\n" !inf !outf in
+let _ = printf "Input file: %s\nOutput file: %s\n%!" !inf !outf in
 if !lcr <> 0 && !lcr < 3 then printf "ERROR: LCR option requires an argument >= 2\n" else
 let (c, n) = read_qasm !inf in
 let c = convert_to_rzq c in (* convert to RzQ gate set *)
-let _ = printf "Input program uses %d gates and %d qubits\n" (total_gate_count c) n in
+let _ = printf "Input program uses %d gates and %d qubits\n%!" (total_gate_count c) n in
 if !lcr <> 0 
 then (
-    let _ = printf "LCR option selected with %d iterations\n" !lcr in
+    let _ = printf "LCR option selected with %d iterations\n%!" !lcr in
     match optimize_nam_lcr c with
     | None -> printf "ERROR: LCR optimization failed\n"
     | Some ((l,c0),r) -> 
@@ -108,9 +108,9 @@ then (
         let _ = printf "Final gate counts (for %d iterations) = { Total : %d, Rzq(Clifford) : %d, " !lcr outtot outcliff in
         print_gc outc
 ) else (
-    let _ = if !optimnam && not !light then printf "Nam optimization enabled\n" else () in
-    let _ = if !light then printf "Nam optimization (light) enabled\n" else () in
-    let _ = if !optimibm then printf "IBM optimization enabled\n" else () in
+    let _ = if !optimnam && not !light then printf "Nam optimization enabled\n%!" else () in
+    let _ = if !light then printf "Nam optimization (light) enabled\n%!" else () in
+    let _ = if !optimibm then printf "IBM optimization enabled\n%!" else () in
     let inc = count_gates c in
     let _ = printf "Original gate counts = { Total : %d, Rzq(Clifford) : %d, " (total_gate_count c) (count_clifford_rzq c) in
     let _ = print_gc inc in

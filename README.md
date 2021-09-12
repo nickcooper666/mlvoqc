@@ -48,6 +48,7 @@ Once you have the VOQC library installed, you can build the command line interfa
 
 *Notes*: 
 * When building the VOQC executable on a Mac, you will likely see the warning `ld: warning: directory not found for option '-L/opt/local/lib'`. This is due to zarith (see [ocaml/opam-repository#3000](https://github.com/ocaml/opam-repository/issues/3000)) and seems to be fine to ignore.
+* If you are building VOQC locally, you may need to run `opam install openqasm` first.
 
 ## Usage
 

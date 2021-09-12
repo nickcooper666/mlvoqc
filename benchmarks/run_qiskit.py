@@ -21,6 +21,9 @@ def count(d):
         sum += d[k]
     return sum
 
+def _opt_control(property_set):
+    return not property_set["depth_fixed_point"]
+
 def run(d, fname):
     
     f = open(fname, "w")
@@ -95,14 +98,12 @@ def run(d, fname):
         basis_gates = ['u1', 'u2', 'u3', 'cx']
         _unroll = Unroller(basis_gates)
         _depth_check = [Depth(), FixedPoint('depth')]
-        def _opt_control(property_set):
-            return not property_set['depth_fixed_point']
-        _opt = [Collect2qBlocks(), ConsolidateBlocks(),
+        _opt = [Collect2qBlocks(), ConsolidateBlocks(basis_gates=basis_gates),
                 Unroller(basis_gates),  # unroll unitaries
                 Optimize1qGates(), CommutativeCancellation()]
         pm = PassManager()
         pm.append(_unroll)
-        pm.append(_depth_check + _opt, do_while=_opt_control)
+        pm.append(_depth_check + _opt + [_unroll], do_while=_opt_control)
         start = time.perf_counter() # start timer
         new_circ = pm.run(circ)
         stop = time.perf_counter() # stop timer

@@ -15,3 +15,8 @@ module RzQGateSet = RzQGateSet.RzQGateSet
 
 (** Utilities for manipulating circuits (useful for defining custom optimizations). *)
 module UnitaryListRepresentation = UnitaryListRepresentation
+
+
+
+(* added for testing... *)
+module Mapper = Mapper

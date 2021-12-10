@@ -16,6 +16,8 @@ Require Import SimpleMapping.
 Require Import StandardGateSet.
 Require Import UnitaryListRepresentation.
 
+Import Qreals. (* Coq version < 8.13.0 has Q2R defined in Qreals *)
+
 (* Standard utilities for bools, options, etc. *)
 Require Coq.extraction.ExtrOcamlBasic.
 
@@ -313,6 +315,14 @@ Extraction Implicit Main.check_constraints [dim].
 Extraction Implicit Main.simple_map [cdim ldim].
 Extraction Implicit Main.layout_to_list [dim].
 
+
+Require Import Mapper.
+Extraction Implicit Mapper.first_layer [dim].
+Extraction Implicit Mapper.qmapper [dim].
+Extraction Implicit Mapper.initial_qmap [dim].
+Extract Inlined Constant hd => "(fun d l -> match l with [] -> d | h :: _ -> h)".
+
+
 (* Perform extraction. *)
 Separate Extraction
   UnitaryListRepresentation.last_single_qubit_gate
@@ -324,4 +334,5 @@ Separate Extraction
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
   Main.check_layout Main.check_graph Main.check_constraints Main.simple_map
   Main.make_tenerife Main.make_lnn Main.make_lnn_ring Main.make_grid
-  Main.trivial_layout Main.list_to_layout Main.layout_to_list.
+  Main.trivial_layout Main.list_to_layout Main.layout_to_list
+  Mapper.initial_qmap.

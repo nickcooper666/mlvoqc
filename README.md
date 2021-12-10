@@ -8,13 +8,15 @@ Scripts to run VOQC on the benchmarks described in our paper are available in th
 
 ## Table of Contents
 
-* [Setup](#setup)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Documentation](#documentation)
-* [Extraction](#extraction)
-* [Contributing](#contributing)
-* [Acknowledgements](#acknowledgements)
+- [mlvoqc](#mlvoqc)
+  - [Table of Contents](#table-of-contents)
+  - [Setup](#setup)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Documentation](#documentation)
+  - [Extraction](#extraction)
+  - [Contributing](#contributing)
+  - [Acknowledgements](#acknowledgements)
 
 ## Setup
 
@@ -82,7 +84,7 @@ Documentation for the VOQC library (generated with [odoc](https://github.com/oca
 
 To re-generate the extracted OCaml code (e.g. when you want to update to include new features from [inQWIRE/SQIR](https://github.com/inQWIRE/SQIR)), change into the `extraction` directory and run `./extract.sh`. This will run Coq on our `Extraction.v` file and move the generated OCaml code to the correct directory. Depending on updates made to the Coq code, you may need to modify `extract.sh` or `Extraction.v`.
 
-In order to perform extraction, you will need to have Coq installed (`opam install coq`). Extraction has only been tested with Coq versions 8.12.x and 8.13.x.
+In order to perform extraction, you will need to have Coq installed (`opam install coq`). Extraction has only been tested with Coq versions 8.12 and 8.13.
 
 *Notes*:
 

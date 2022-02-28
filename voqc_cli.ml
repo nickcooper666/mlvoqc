@@ -15,6 +15,7 @@ open Voqc.Main
 
     -i <f> : input file
     -o <f> : output file
+    -v : print verbose gate counts (default is total, 1q, 2q, and 3q)
     -optimize-nam : run the Nam optimizations
     -optimize-nam-light : run the light version of optimize-nam
     -optimize-nam-lcr <n> : run LCR optimization with Nam optimizations; give gate counts for n iterations of the input program (incompatible with all other options except -i and -o)
@@ -26,14 +27,35 @@ open Voqc.Main
     -- : initial layout for mapping
 *)
 
-(* Print gate counts *)
 let print_gc (gc : gate_counts) =
   match gc with
   | BuildCounts (i, x, y, z, h, s, t, sdg, tdg, rx, ry, rz, rzq, u1, u2, u3, cx, cz, swap, ccx, ccz) ->
       (printf "I : %d, X : %d, Y : %d, Z : %d, H : %d, %!" i x y z h; 
        printf "S : %d, T : %d, Sdg : %d, Tdg : %d, Rx : %d, %!" s t sdg tdg rx; 
        printf "Ry : %d, Rz : %d, Rzq : %d, U1 : %d, U2 : %d, U3 : %d, %!" ry rz rzq u1 u2 u3; 
-       printf "CX : %d, CZ : %d, SWAP : %d, CCX : %d, CCZ : %d } %!\n" cx cz swap ccx ccz) 
+       printf "CX : %d, CZ : %d, SWAP : %d, CCX : %d, CCZ : %d } %!\n" cx cz swap ccx ccz)
+
+(* Print gate count info *)
+let print_info c verbose =
+  let gc = count_gates c in
+  if verbose
+  then (
+    printf "{ Total : %d, Rzq(Clifford) : %d, " (total_gate_count c) (count_clifford_rzq c);
+    match gc with
+    | BuildCounts (i, x, y, z, h, s, t, sdg, tdg, rx, ry, rz, rzq, u1, u2, u3, cx, cz, swap, ccx, ccz) ->
+        (printf "I : %d, X : %d, Y : %d, Z : %d, H : %d, %!" i x y z h; 
+         printf "S : %d, T : %d, Sdg : %d, Tdg : %d, Rx : %d, %!" s t sdg tdg rx; 
+         printf "Ry : %d, Rz : %d, Rzq : %d, U1 : %d, U2 : %d, U3 : %d, %!" ry rz rzq u1 u2 u3; 
+         printf "CX : %d, CZ : %d, SWAP : %d, CCX : %d, CCZ : %d } %!\n" cx cz swap ccx ccz)
+  )
+  else (
+    printf "{ Total : %d, " (total_gate_count c);
+    match gc with
+    | BuildCounts (i, x, y, z, h, s, t, sdg, tdg, rx, ry, rz, rzq, u1, u2, u3, cx, cz, swap, ccx, ccz) ->
+        (printf "1q : %d, %!" (i + x + y + z + h + s + t + sdg + tdg + rx + ry + rz + rzq + u1 + u2 + u3); 
+         printf "2q : %d, %!"  (cx + cz + swap); 
+         printf "3q : %d } %!\n" (ccx + ccz))
+  )
 
 (* Print mapping layout *)
 let print_layout la n = List.iter (printf "%d ") (layout_to_list la n); printf "\n"
@@ -54,6 +76,7 @@ let run_mapping n dim c la cg = (* n = # qubits in prog, dim = # qubits on machi
 (* Argument parsing *)
 let inf = ref ""
 let outf = ref ""
+let verbose = ref false
 let optimnam = ref false
 let lcr = ref 0
 let light = ref false
@@ -65,10 +88,11 @@ let tenerife = ref false
 let optimibm = ref false
 let layout : int list ref = ref []
 let add_to_layout (s:string) = layout := (!layout @ [int_of_string s])
-let usage = "usage: " ^ Sys.argv.(0) ^ " -i string -o string [-optimize-nam] [-optimize-nam-light] [-optimize-nam-lcr int] [-optimize-ibm] [-lnn int] [-lnnring int] [-grid int int] [-tenerife] [-optimize-ibm] [-- int list]"
+let usage = "usage: " ^ Sys.argv.(0) ^ " -i string -o string [-v] [-optimize-nam] [-optimize-nam-light] [-optimize-nam-lcr int] [-optimize-ibm] [-lnn int] [-lnnring int] [-grid int int] [-tenerife] [-- int list]"
 let speclist = [
     ("-i", Arg.Set_string inf, ": input file");
     ("-o", Arg.Set_string outf, ": output file");
+    ("-v", Arg.Set verbose, ": print verbose gate counts (default is total, 1q, 2q, and 3q)");
     ("-optimize-nam", Arg.Set optimnam, ": run the Nam optimizations");
     ("-optimize-nam-light", Arg.Set light, ": run the light version of optimize-nam");
     ("-optimize-nam-lcr", Arg.Set_int lcr,  ": run LCR optimization with Nam optimizations; give gate counts for n iterations of the input program (incompatible with all other options except -i and -o)");
@@ -88,6 +112,7 @@ if !inf = "" then printf "ERROR: Input filename (-i) required.\n" else
 if !outf = "" then printf "ERROR: Output filename (-o) required.\n" else 
 let _ = printf "Input file: %s\nOutput file: %s\n%!" !inf !outf in
 if !lcr <> 0 && !lcr < 3 then printf "ERROR: LCR option requires an argument >= 2\n" else
+if !lcr <> 0 && not !verbose then printf "ERROR: LCR option requires verbose mode\n" else
 let (c, n) = read_qasm !inf in
 let c = convert_to_rzq c in (* convert to RzQ gate set *)
 let _ = printf "Input program uses %d gates and %d qubits\n%!" (total_gate_count c) n in
@@ -111,15 +136,13 @@ then (
     let _ = if !optimnam && not !light then printf "Nam optimization enabled\n%!" else () in
     let _ = if !light then printf "Nam optimization (light) enabled\n%!" else () in
     let _ = if !optimibm then printf "IBM optimization enabled\n%!" else () in
-    let inc = count_gates c in
-    let _ = printf "Original gate counts = { Total : %d, Rzq(Clifford) : %d, " (total_gate_count c) (count_clifford_rzq c) in
-    let _ = print_gc inc in
+    let _ = printf "Original gate counts = " in
+    let _ = print_info c !verbose in
     let c1 = if !optimnam && not !light then optimize_nam c else c in
     let c2 = if !light then optimize_nam_light c1 else c1 in
     let c3 = if !optimibm then optimize_ibm c2 else c2 in
-    let outc = count_gates c3 in
-    let _ = printf "Final gate counts = { Total : %d, Rzq(Clifford) : %d, " (total_gate_count c3) (count_clifford_rzq c3) in
-    let _ = print_gc outc in
+    let _ = printf "Final gate counts = " in
+    let _ = print_info c3 !verbose in
     let c4 = if !lnn > 0 then (
                  let cg = make_lnn !lnn in
                  let _ = printf "LNN mapping enabled\n" in

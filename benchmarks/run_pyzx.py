@@ -10,33 +10,33 @@ def run(d, fname):
     
     f = open(fname, "w")
         
-    f.write("name,Orig. total,Orig. CNOT,Orig. T,PyZX total,PyZX CNOT,PyZX T,time\n")
+    f.write("name,T,2q,total,time\n")
     
     for fname in os.listdir(d):
 
         print("Processing %s..." % fname)
         
         circ = zx.Circuit.load(os.path.join(d, fname)).to_basic_gates()
-        num_gates_before = len(circ.gates)
-        cnot_count_before = circ.twoqubitcount()
-        t_count_before = zx.tcount(circ)
-        print("Original:\t Total %d, CNOT %d, T %d" % (num_gates_before, cnot_count_before, t_count_before))
-        
-        start = time.perf_counter() # start timer
+
+        start = time.perf_counter()
         g = circ.to_graph()
         zx.full_reduce(g,quiet=False)
         g.normalize()
         new_circ = zx.extract_circuit(g).to_basic_gates()
-        stop = time.perf_counter() # stop timer
-        num_gates_after = len(new_circ.gates)
-        cnot_count_after = new_circ.twoqubitcount()
-        t_count_after = zx.tcount(new_circ)
-        print("Final:\t Total %d, CNOT %d, T %d\n" % (num_gates_after, cnot_count_after, t_count_after))
+        stop = time.perf_counter()
 
-        f.write("%s,%d,%d,%d,%d,%d,%d,%f\n" % (fname, num_gates_before, cnot_count_before, t_count_before, num_gates_after, cnot_count_after, t_count_after, stop - start))
+        total_count = len(new_circ.gates)
+        two_count = new_circ.twoqubitcount()
+        t_count = zx.tcount(new_circ)
+
+        print("\t Total %d, T %d, CNOT %d\n" % (total_count, t_count, two_count))
+
+        f.write("%s,%d,%d,%d,%f\n" % (fname, t_count, two_count, total_count, stop - start))
+
+    f.close()
 
 if (len(sys.argv) != 3):
-    print("Usage: python3 run_pyzx.py <input directory> <output file>")
+    print("Usage: python run_pyzx.py <input directory> <output file>")
     exit(-1)
 
 run(sys.argv[1], sys.argv[2])

@@ -178,7 +178,7 @@ module Z =
       (fun _ -> (0, 0))
       (fun a' ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
-        (fun _ -> (0, 0))
+        (fun _ -> (0, a))
         (fun _ -> pos_div_eucl a' b)
         (fun b' ->
         let (q, r) = pos_div_eucl a' b' in
@@ -190,7 +190,7 @@ module Z =
         b)
       (fun a' ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
-        (fun _ -> (0, 0))
+        (fun _ -> (0, a))
         (fun _ ->
         let (q, r) = pos_div_eucl a' b in
         ((fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
@@ -243,17 +243,17 @@ module Z =
         (fun _ -> false)
         (fun _ -> false)
         y)
-      (fun x0 ->
+      (fun p ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
         (fun _ -> false)
-        (fun p0 -> Pos.eq_dec x0 p0)
+        (fun p0 -> Pos.eq_dec p p0)
         (fun _ -> false)
         y)
-      (fun x0 ->
+      (fun p ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
         (fun _ -> false)
         (fun _ -> false)
-        (fun p0 -> Pos.eq_dec x0 p0)
+        (fun p0 -> Pos.eq_dec p p0)
         y)
       x
  end

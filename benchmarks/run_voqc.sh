@@ -1,10 +1,8 @@
 #!/bin/bash
 
 RED='\033[0;31m'
-BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
 NOCOLOR='\033[0m'
 
 # Special formatting for time output
@@ -74,7 +72,7 @@ do
     index=$((index+1))
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-lcr ${iter}) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-lcr ${iter} -v) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> PF_results.csv
     rm -rf ${program_name}.txt
 done
@@ -87,7 +85,7 @@ do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam -v) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> Arithmetic_and_Toffoli_results.csv
     rm -rf ${program_name}.txt
 done
@@ -101,7 +99,7 @@ do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam -v) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> QFT_and_Adders_results.csv
     rm -rf ${program_name}.txt
 done
@@ -111,7 +109,7 @@ do
     program_name=`basename "$filename" .qasm`
     currentTime=`date`
     printf "${CYAN}   + [${currentTime}] Running on ${filename}${NOCOLOR}\n"
-    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-light) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam-light -v) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> QFT_and_Adders_results.csv
     rm -rf ${program_name}.txt
 done

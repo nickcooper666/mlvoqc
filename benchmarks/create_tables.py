@@ -14,7 +14,7 @@ import re
 # into a dictionary. The keys are the circuit names.
 # Values are another dictionary where the keys are
 # the header fields. This dictionary is returned
-def parseCVStoDict(fileName):
+def parseCSVtoDict(fileName):
     fIn = open(fileName, "r")
     lines = fIn.readlines()
     fIn.close()
@@ -72,13 +72,12 @@ def outputTable2(qiskit_dict, tket_dict, voqc_dict):
     tket_red = []
     voqc_red = []
     for circuit in circuits:
-        # orig is same in all dicts
-        orig = qiskit_dict[circuit]["Orig. total"]
-        qiskit = qiskit_dict[circuit]["Qiskit total"]
-        tket = tket_dict[circuit]["tket total"]
+        orig = voqc_dict[circuit]["Orig. total"]
+        qiskit = qiskit_dict[circuit]["total"]
+        tket = tket_dict[circuit]["total"]
         voqc = voqc_dict[circuit]["VOQC total"]
         print("%s| %s\t\t%s\t\t%s\t\t%s" %(circuit.ljust(15), orig, qiskit, tket, voqc))
-        if circuit != "qcla_mod_7":
+        if circuit != "qcla_mod_7": # causes div by zero
             qiskit_red += [(1.0-float(qiskit)/float(orig))*100]
             tket_red += [(1.0-float(tket)/float(orig))*100]
             voqc_red += [(1.0-float(voqc)/float(orig))*100]
@@ -106,7 +105,7 @@ def outputTable3(voqc_dict, pyzx_dict):
     for circuit in circuits:
         # orig is same in all dicts
         orig = str(int(voqc_dict[circuit]["Orig. Rzq"]) - int(voqc_dict[circuit]["Orig. Cliff"]))
-        pyzx = pyzx_dict[circuit]["PyZX T"]
+        pyzx = pyzx_dict[circuit]["T"]
         voqc = str(int(voqc_dict[circuit]["VOQC Rzq"]) - int(voqc_dict[circuit]["VOQC Cliff"]))
         print("%s| %s\t\t%s\t\t%s" %(circuit.ljust(15), orig, pyzx, voqc))
         # Exclude these two benchmarks from averages
@@ -124,14 +123,13 @@ def outputTable3(voqc_dict, pyzx_dict):
 
 #############################################################################################
 if __name__ == "__main__":
-    # Read in each CVS into a dictionary
-    pyzx_dict = parseCVStoDict("pyzx_out.csv")
-    qiskit_dict = parseCVStoDict("qiskit_out.csv")
-    tket_dict = parseCVStoDict("tket_out.csv")
-    voqc_dict = parseCVStoDict("voqc_out.csv")
+    # Read in each CSV into a dictionary
+    pyzx_dict = parseCSVtoDict("pyzx_out.csv")
+    qiskit_dict = parseCSVtoDict("qiskit_out.csv")
+    tket_dict = parseCSVtoDict("tket_out.csv")
+    voqc_dict = parseCSVtoDict("voqc_out.csv")
 
-    # Print out geomean runtimes across all
-    # circuits
+    # Print out geomean runtimes across all circuits
     outputGeomeanRuntimes(qiskit_dict, tket_dict, voqc_dict, pyzx_dict)
 
     # Construct Table 2 in the paper. The header for

@@ -71,7 +71,7 @@ module Nat =
 
   let modulo x y =
     (fun fO fS n -> if n=0 then fO () else fS (n-1))
-      (fun _ -> y)
+      (fun _ -> x)
       (fun y' -> sub y' (snd (divmod x y' 0 y')))
       y
  end

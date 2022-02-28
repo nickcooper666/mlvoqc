@@ -1,10 +1,8 @@
 #!/bin/bash
 
 RED='\033[0;31m'
-BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
-YELLOW='\033[1;33m'
 NOCOLOR='\033[0m'
 
 # Get files
@@ -20,7 +18,7 @@ echo "name,Orig. total,Orig. Rzq,Orig. Cliff,Orig. H,Orig. X,Orig. CX,VOQC total
 for filename in "${Arithmetic_and_Toffoli_filenames[@]}"
 do
     program_name=`basename "$filename" .qasm`
-    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam) &> ${program_name}.txt
+    (time dune exec --root .. -- ./voqc_cli.exe -i ${filename} -o out.qasm -optimize-nam -v) &> ${program_name}.txt
     python parseOutput.py ${program_name}.txt >> voqc_out.csv
     rm -rf ${program_name}.txt
     rm -rf out.qasm

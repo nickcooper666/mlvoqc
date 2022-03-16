@@ -1,4 +1,4 @@
-open StandardGateSet
+open FullGateSet
 open UnitaryListRepresentation
 
 (** {1 Overview} *)
@@ -58,16 +58,8 @@ open UnitaryListRepresentation
 
 (** {1 Types} *)
 
-(** The [circ] type is a list of gates from the standard gate set. *)
-type circ = StandardGateSet.coq_Std_Unitary gate_list
-
-(** [gate_counts] is the return type for [count_gates]. It stores the count of
-   each gate type in the following order: \{ I, X, Y, Z, H, S, T, Sdg, Tdg, Rx, 
-   Ry, Rz, Rz, U1, U2, U3, CX, CZ , SWAP, CCX, CCZ \}. *)
-type gate_counts =
-| BuildCounts of int * int * int * int * int * int * int * int * int * 
-   int * int * int * int * int * int * int * int * int * int * int * 
-   int
+(** The [circ] type is a list of gates from the full gate set. *)
+type circ = FullGateSet.coq_Full_Unitary gate_list
 
 (** A {i layout} describes a mapping from logical to physical qubits.
    For an architecture with n qubits, a layout should be a bijection on 
@@ -114,37 +106,52 @@ val convert_to_rzq : circ -> circ
 (** Replace the (non-standard) Rzq gate with its equivalent Rz, Z, T, S, Tdg, or Sdg gate.
     
    {i Verified Properties:} preserves semantics, preserves WT, preserves mapping, 
-   uses any gate in the standard set except Rzq *)
+   uses any gate in the full set except Rzq *)
 val replace_rzq : circ -> circ
 
 (** Decompose CZ, SWAP, CCX, and CCZ gates so that the only multi-qubit gate is 
    CX (also called "CNOT").
     
    {i Verified Properties:} preserves semantics, preserves WT, uses any gate in 
-   the standard set except \{CZ, SWAP, CCX, CCZ\} *)
+   the full set except \{CZ, SWAP, CCX, CCZ\} *)
 val decompose_to_cnot : circ -> circ
 
-(** Count all types of gates in the program. Note that this count is {i syntactic} 
-   in the sense that gates like Rz, Rzq, and U1 are counted separately even 
-   though they all could be considered a U1 gate. Similarly, the count for X does
-   not include gates of the form U3(PI,0,PI), even though this is functionally the same. *)
-val count_gates : circ -> gate_counts
+val count_I : circ -> int
+val count_X : circ -> int
+val count_Y : circ -> int
+val count_Z : circ -> int
+val count_H : circ -> int
+val count_S : circ -> int
+val count_T : circ -> int
+val count_Sdg : circ -> int
+val count_Tdg : circ -> int
+val count_Rx : circ -> int
+val count_Ry : circ -> int
+val count_Rz : circ -> int
+val count_Rzq : circ -> int
+val count_U1 : circ -> int
+val count_U2 : circ -> int
+val count_U3 : circ -> int
+val count_CX : circ -> int
+val count_CZ : circ -> int
+val count_SWAP : circ -> int
+val count_CCX : circ -> int
+val count_CCZ : circ -> int
+
+(** Count the number of 1-qubit gates. *)
+val count_1q : circ -> int
+
+(** Count the number of 2-qubit gates. *)
+val count_2q : circ -> int
+
+(** Count the number of 3-qubit gates. *)
+val count_3q : circ -> int
 
 (** Count the total number of gates (i.e. length of the instruction list). *)
-val total_gate_count : circ -> int
+val count_total : circ -> int
 
 (** Count the Rzq gates parameterized by a multiple of PI/2 (i.e. "Clifford" Rz gates). *)
-val count_clifford_rzq : circ -> int
-
-(** Multiply all gate counts by a factor n. *)
-val scale_count : gate_counts -> int -> gate_counts
-
-(** Add gate counts. *)
-val add_counts : gate_counts -> gate_counts -> gate_counts
-
-(** Compute the gates required for n iterations of the input LCR decomposition 
-   (see [optimize_nam_lcr]).  *)
-val count_gates_lcr : ((circ * circ) * circ) -> int -> gate_counts
+val count_rzq_clifford : circ -> int
 
 (** {2 Optimization Functions} *)
 
@@ -228,34 +235,77 @@ val optimize_nam_lcr : circ -> ((circ * circ) * circ) option
 
 (** {2 Mapping Functions} *)
 
-(** Check if a layout is well-formed. *)
-val check_layout : layout -> int -> bool
-
-(** Check if a graph is well-formed. This function will make O(n^2) calls to 
-   the path finding function for n qubits, so it will likely be slow. *)
-val check_graph : c_graph -> bool
-
-(** Check if a circuit satisfies the constraints of a connectivity graph. *)
-val check_constraints : circ -> c_graph -> bool
-
-(** Return [(c, la)] where [c] is the mapped circuit and [la] is the final layout.
+(** Map a circuit to an architecture given an initial layout.
     
     {i Verified properties:} Provided that that the input circuit is well-typed 
     using the dimension stored in the input graph and the input layout and graph 
     are well-formed, this transformation preserves semantics (WT, perm) and preserves WT. 
-    Furthermore, the output [c] respects the constraints the input graph and [la] 
-    is well-formed. *)
-val simple_map : circ -> layout -> c_graph -> circ * layout
+    Furthermore, the output [c] respects the (undirected) constraints of the input graph. *)
+val swap_route : circ -> layout -> c_graph -> circ
 
+(** Decompose swap gates and reorient cnot gates to satisfy connectivity constraints.
+    
+    {i Verified properties:} Provided that that the input circuit is well-typed 
+    using the dimension stored in the input graph, this transformation preserves 
+    semantics (WT) and preserves WT. Furthermore, the output respects the constraints 
+    of the input graph. *)
+val decompose_swaps : circ -> c_graph -> circ
+
+(** Create a trivial layout on n qubits (i.e. logical qubit i is mapped to physical qubit i).
+    
+    {i Verified Properties:} The output layout is well-formed. *)
+val trivial_layout : int -> layout
+
+(** Make a layout from a list. Example: the list [[3; 4; 1; 2; 0]] is transformed 
+   to a layout with physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\}
+   (so physical qubit 0 stores logical qubit 3) and the appropriate inverse logical 
+   to physical mapping. Returns None if the input list is ill-formed. 
+   
+   {i Verified Properties:} The output layout is well-formed. *)
+val list_to_layout : int list -> layout option
+
+(** Convert a layout to a list for easier printing. Example: the layout with 
+   physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\} is
+   transformed to the list [[3; 4; 1; 2; 0]]. *)    
+val layout_to_list : layout -> int -> int option list
+
+(** Choose an initial layout for a program that puts qubits close together on 
+   the architecture if they are used together in a two-qubit gate. 
+   
+   {i Verified Properties:} The output layout is well-formed. *)
+val greedy_layout : circ -> c_graph -> layout
+
+(** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
+    
+   {i Verified Properties:} The output connectivity graph is well-formed. *)
+val make_lnn : int -> c_graph
+
+(** Remove all swap gates from a program, instead performing a logical relabeling 
+   of qubits. 
+   
+   {i Verified Properties:} Provided that that the input circuit is well-typed 
+   and the input layout is well-formed, this transformation preserves semantics 
+   (WT, perm) and preserves WT.  *)
+val remove_swaps : circ -> layout -> circ
+
+(** Check if two programs (and their initial layouts) are equivalent up to inserted
+   swaps gates. This function can be used to validate circuit routing routines. 
+   
+   {i Verified Properties:} If this function returns true, the programs are equivalent
+   up to a permutation of qubits.  *)
+val check_swap_equivalence : circ -> circ -> layout -> layout -> bool
+
+(** Check if a circuit satisfies the constraints of a connectivity graph.
+
+   {i Verified Properties:} If this function returns true, the program satisfies
+   the constraints of the connectivity graph. *)
+val check_constraints : circ -> c_graph -> bool
+
+(*
 (** Create a graph for {{:https://github.com/Qiskit/ibmq-device-information/blob/master/backends/tenerife/V1/version_log.md}IBM's 5-qubit Tenerife machine}).
     
     {i Verified Properties:} The output connectivity graph is well-formed. *)
 val make_tenerife : unit -> c_graph
-
-(** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val make_lnn : int -> c_graph
 
 (** Create a 1D LNN ring graph with n qubits (see POPL VOQC Fig 8(c)).
     
@@ -266,19 +316,4 @@ val make_lnn_ring : int -> c_graph
     
     {i Verified Properties:} The output connectivity graph is well-formed. *)
 val make_grid : int -> int -> c_graph
-
-(** Create a trivial layout on n qubits (i.e. logical qubit i is mapped to physical qubit i).
-    
-    {i Verified Properties:} The output layout is well-formed.*)
-val trivial_layout : int -> layout
-
-(** Make a layout from a list. Example: the list [[3; 4; 1; 2; 0]] is transformed 
-   to a layout with physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\}
-   (so physical qubit 0 stores logical qubit 3) and the appropriate inverse logical 
-   to physical mapping.*)
-val list_to_layout : int list -> layout
-
-(** Convert a layout to a list for easier printing. Example: the layout with 
-   physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\} is
-   transformed to the list [[3; 4; 1; 2; 0]].*)    
-val layout_to_list : layout -> int -> int list
+*)

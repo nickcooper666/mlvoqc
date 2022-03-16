@@ -29,8 +29,7 @@ rm -f BinNums.ml ClassicalDedekindReals.ml ConstructiveCauchyReals.ml \
 
 # Move remaining extracted files to the ml/extracted directory.
 mv Bin*.ml CXCancellation.ml ChangeRotationBasis.ml ConnectivityGraph.ml Datatypes.ml \
-   GateCancellation.ml HadamardReduction.ml IBMGateSet.ml Layouts.ml Main.ml \
-   Mapper.ml NotPropagation.ml Optimize1qGates.ml PeanoNat.ml RotationMerging.ml \
-   RzQGateSet.ml SimpleMapping.ml StandardGateSet.ml UnitaryListRepresentation.ml \
+   FullGateSet.ml GateCancellation.ml GreedyLayout.ml HadamardReduction.ml IBMGateSet.ml \
+   Layouts.ml Main.ml MappingGateSet.ml MappingValidation.ml NotPropagation.ml Optimize1qGates.ml \
+   PeanoNat.ml RotationMerging.ml RzQGateSet.ml SwapRoute.ml UnitaryListRepresentation.ml \
    ../ml/extracted
-

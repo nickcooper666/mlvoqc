@@ -117,9 +117,22 @@ module Z =
 
   let max = Pervasives.max
 
+  (** val min : int -> int -> int **)
+
+  let min = Pervasives.min
+
   (** val abs : int -> int **)
 
   let abs = Pervasives.abs
+
+  (** val to_nat : int -> int **)
+
+  let to_nat z =
+    (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
+      (fun _ -> 0)
+      (fun p -> Pos.to_nat p)
+      (fun _ -> 0)
+      z
 
   (** val of_nat : int -> int **)
 
@@ -165,7 +178,7 @@ module Z =
       (fun _ -> (0, 0))
       (fun a' ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
-        (fun _ -> (0, 0))
+        (fun _ -> (0, a))
         (fun _ -> pos_div_eucl a' b)
         (fun b' ->
         let (q, r) = pos_div_eucl a' b' in
@@ -177,7 +190,7 @@ module Z =
         b)
       (fun a' ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
-        (fun _ -> (0, 0))
+        (fun _ -> (0, a))
         (fun _ ->
         let (q, r) = pos_div_eucl a' b in
         ((fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
@@ -230,17 +243,17 @@ module Z =
         (fun _ -> false)
         (fun _ -> false)
         y)
-      (fun x0 ->
+      (fun p ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
         (fun _ -> false)
-        (fun p0 -> Pos.eq_dec x0 p0)
+        (fun p0 -> Pos.eq_dec p p0)
         (fun _ -> false)
         y)
-      (fun x0 ->
+      (fun p ->
       (fun f0 fp fn z -> if z=0 then f0 () else if z>0 then fp z else fn (-z))
         (fun _ -> false)
         (fun _ -> false)
-        (fun p0 -> Pos.eq_dec x0 p0)
+        (fun p0 -> Pos.eq_dec p p0)
         y)
       x
  end

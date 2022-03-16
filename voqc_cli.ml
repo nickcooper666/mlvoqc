@@ -44,7 +44,7 @@ let run_mapping n dim c la cg = (* n = # qubits in prog, dim = # qubits on machi
     let la = list_to_layout la in
     if not (check_layout la dim) then failwith "ERROR: Invalid input layout" else
     let _ = (printf "Input layout: "; print_layout la dim) in
-    let (c',la') = simple_map c la cg in
+    let (c',la') = swap_route c la cg in
     let gc = count_gates c' in
     let _ = (printf "Output layout: "; print_layout la' dim) in
     let _ = printf "Gate counts after mapping (%d total):\n" (total_gate_count c') in

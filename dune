@@ -11,4 +11,4 @@
 (executable
   (name mapper_test)
   (modules mapper_test)
-  (libraries voqc))
+  (libraries voqc str))

@@ -2,18 +2,21 @@ Require Coq.extraction.Extraction.
 Require Import CXCancellation.
 Require Import ChangeRotationBasis.
 Require Import ConnectivityGraph.
+Require Import FullGateSet.
 Require Import GateCancellation.
 Require Import GateSet.
+Require Import GreedyLayout.
 Require Import HadamardReduction.
 Require Import IBMGateSet.
 Require Import Layouts.
 Require Import Main.
+Require Import MappingGateSet.
+Require Import MappingValidation.
 Require Import NotPropagation.
 Require Import Optimize1qGates.
 Require Import RotationMerging.
 Require Import RzQGateSet.
-Require Import SimpleMapping.
-Require Import StandardGateSet.
+Require Import SwapRoute.
 Require Import UnitaryListRepresentation.
 
 Import Qreals. (* Coq version < 8.13.0 has Q2R defined in Qreals *)
@@ -101,7 +104,7 @@ Extract Inlined Constant R2Q => "Q.of_float".
 (* Set the dimension argument to be implicit everywhere -- it should be an
    unused argument everywhere in the OCaml code. *)
 
-(* From ListRepresentation.v *)
+(* From UnitaryListRepresentation.v *)
 Extraction Implicit next_single_qubit_gate' [dim].
 Extraction Implicit next_single_qubit_gate [dim].
 Extraction Implicit last_single_qubit_gate [dim].
@@ -114,6 +117,7 @@ Extraction Implicit does_not_reference [dim].
 Extraction Implicit UnitaryListRepresentation.remove_prefix [dim].
 Extraction Implicit UnitaryListRepresentation.remove_suffix [dim].
 Extraction Implicit UnitaryListRepresentation.replace_pattern [dim].
+Extraction Implicit UnitaryListRepresentation.equalb [dim].
 Extraction Implicit try_rewrites [dim].
 Extraction Implicit try_rewrites2 [dim].
 Extraction Implicit propagate' [dim].
@@ -223,52 +227,60 @@ Extraction Implicit Optimize1qGates.optimize_1q_gates [dim].
 Extraction Implicit CXCancellation.cx_cancellation' [dim].
 Extraction Implicit CXCancellation.cx_cancellation [dim].
 
-(* From StandardGateSet.v *)
-Extraction Implicit StandardGateSet.change_gate_set' [dim].
-Extraction Implicit StandardGateSet.change_gate_set [dim].
-Extraction Implicit StandardGateSet.standard_to_IBM_u [dim].
-Extraction Implicit StandardGateSet.IBM_to_standard_u [dim].
-Extraction Implicit StandardGateSet.standard_to_IBM [dim].
-Extraction Implicit StandardGateSet.IBM_to_standard [dim].
-Extraction Implicit StandardGateSet.Rx [dim].
-Extraction Implicit StandardGateSet.Ry [dim].
-Extraction Implicit StandardGateSet.Rz [dim].
-Extraction Implicit StandardGateSet.U1 [dim].
-Extraction Implicit StandardGateSet.U2 [dim].
-Extraction Implicit StandardGateSet.U3 [dim].
-Extraction Implicit StandardGateSet.standard_to_RzQ_u [dim].
-Extraction Implicit StandardGateSet.RzQ_to_standard_u [dim].
-Extraction Implicit StandardGateSet.standard_to_RzQ [dim].
-Extraction Implicit StandardGateSet.RzQ_to_standard [dim].
-Extraction Implicit StandardGateSet.decompose_to_cnot_u [dim].
-Extraction Implicit StandardGateSet.decompose_to_cnot [dim].
-Extraction Implicit StandardGateSet.convert_to_ibm [dim].
-Extraction Implicit StandardGateSet.convert_to_rzq [dim].
-Extraction Implicit StandardGateSet.replace_rzq_u [dim].
-Extraction Implicit StandardGateSet.replace_rzq [dim].
+(* From MappingGateSet.v *)
+Extraction Implicit MappingGateSet.CNOT [dim].
+Extraction Implicit MappingGateSet.SWAP [dim].
 
-(* From Layouts.v *)
-Extraction Implicit Layouts.log2phys [dim].
-Extraction Implicit Layouts.phys2log [dim].
-Extraction Implicit Layouts.swap_in_map [dim].
+(* From FullGateSet.v *)
+Extraction Implicit FullGateSet.change_gate_set' [dim].
+Extraction Implicit FullGateSet.change_gate_set [dim].
+Extraction Implicit FullGateSet.full_to_IBM_u [dim].
+Extraction Implicit FullGateSet.IBM_to_full_u [dim].
+Extraction Implicit FullGateSet.full_to_IBM [dim].
+Extraction Implicit FullGateSet.IBM_to_full [dim].
+Extraction Implicit FullGateSet.Rx [dim].
+Extraction Implicit FullGateSet.Ry [dim].
+Extraction Implicit FullGateSet.Rz [dim].
+Extraction Implicit FullGateSet.U1 [dim].
+Extraction Implicit FullGateSet.U2 [dim].
+Extraction Implicit FullGateSet.U3 [dim].
+Extraction Implicit FullGateSet.full_to_RzQ_u [dim].
+Extraction Implicit FullGateSet.RzQ_to_full_u [dim].
+Extraction Implicit FullGateSet.full_to_RzQ [dim].
+Extraction Implicit FullGateSet.RzQ_to_full [dim].
+Extraction Implicit FullGateSet.full_to_map_u [dim].
+Extraction Implicit FullGateSet.map_to_full_u [dim].
+Extraction Implicit FullGateSet.full_to_map [dim].
+Extraction Implicit FullGateSet.map_to_full [dim].
+Extraction Implicit FullGateSet.decompose_to_cnot_and_swap_u [dim].
+Extraction Implicit FullGateSet.decompose_to_cnot_u [dim].
+Extraction Implicit FullGateSet.decompose_to_cnot [dim].
+Extraction Implicit FullGateSet.convert_to_ibm [dim].
+Extraction Implicit FullGateSet.convert_to_rzq [dim].
+Extraction Implicit FullGateSet.replace_rzq_u [dim].
+Extraction Implicit FullGateSet.replace_rzq [dim].
 
-(* From SimpleMapping.v *)
-Extraction Implicit SimpleMapping.respects_constraints_directed_b [dim].
-Extraction Implicit SimpleMapping.decompose_swaps_u [dim].
-Extraction Implicit SimpleMapping.decompose_swaps [dim].
-Extraction Implicit SimpleMapping.SWAP [dim].
-Extraction Implicit SimpleMapping.CNOT [dim].
-Extraction Implicit SimpleMapping.H [dim].
-Extraction Implicit SimpleMapping.path_to_swaps [dim].
-Extraction Implicit SimpleMapping.fix_cnots [dim].
-Extraction Implicit SimpleMapping.insert_swaps [dim].
-Extraction Implicit SimpleMapping.simple_map [dim].
+(* From GreedyLayout.v *)
+Extraction Implicit GreedyLayout.build_layout [dim].
+Extraction Implicit GreedyLayout.greedy_layout [dim].
+
+(* From SwapRoute.v *)
+Extraction Implicit SwapRoute.path_to_swaps [dim].
+Extraction Implicit SwapRoute.swap_route [dim].
+Extraction Implicit SwapRoute.H [dim].
+Extraction Implicit SwapRoute.decompose_swaps_and_cnots_aux [dim].
+Extraction Implicit SwapRoute.decompose_swaps_and_cnots [dim].
+
+(* From MappingValidation.v *)
+Extraction Implicit MappingValidation.remove_swaps [dim].
+Extraction Implicit MappingValidation.check_swap_equivalence [dim].
+Extraction Implicit MappingValidation.is_swap_equivalent [dim].
+Extraction Implicit MappingValidation.check_gate_constraint [dim].
+Extraction Implicit MappingValidation.check_constraints [dim].
 
 (* From Main.v *)
 Extraction Implicit Main.cast [dim].
 Extract Inlined Constant Main.cast => "(fun x _ -> x)".
-Extraction Implicit Main.cast_layout [dim].
-Extract Inlined Constant Main.cast_layout => "(fun x _ -> x)".
 Extraction Implicit Main.check_well_typed [dim].
 Extraction Implicit Main.convert_to_ibm [dim].
 Extraction Implicit Main.convert_to_rzq [dim].
@@ -295,10 +307,11 @@ Extraction Implicit Main.count_CZ [dim].
 Extraction Implicit Main.count_SWAP [dim].
 Extraction Implicit Main.count_CCX [dim].
 Extraction Implicit Main.count_CCZ [dim].
-Extraction Implicit Main.count_gates [dim].
-Extraction Implicit Main.total_gate_count [dim].
-Extraction Implicit Main.count_clifford_rzq [dim].
-Extraction Implicit Main.count_gates_lcr [dim]. 
+Extraction Implicit Main.count_1q [dim].
+Extraction Implicit Main.count_2q [dim].
+Extraction Implicit Main.count_3q [dim].
+Extraction Implicit Main.count_total [dim].
+Extraction Implicit Main.count_rzq_clifford [dim].
 Extraction Implicit Main.optimize_1q_gates [dim].
 Extraction Implicit Main.cx_cancellation [dim].
 Extraction Implicit Main.optimize_ibm [dim].
@@ -310,29 +323,25 @@ Extraction Implicit Main.merge_rotations [dim].
 Extraction Implicit Main.optimize_nam [dim].
 Extraction Implicit Main.optimize_nam_light [dim].
 Extraction Implicit Main.optimize_nam_lcr [dim].
-Extraction Implicit Main.check_layout [dim].
+Extraction Implicit Main.swap_route [dim].
+Extraction Implicit Main.decompose_swaps [dim].
+Extraction Implicit Main.greedy_layout [dim].
+Extraction Implicit Main.remove_swaps [dim].
+Extraction Implicit Main.check_swap_equivalence [dim].
 Extraction Implicit Main.check_constraints [dim].
-Extraction Implicit Main.simple_map [cdim ldim].
-Extraction Implicit Main.layout_to_list [dim].
-
-
-Require Import Mapper.
-Extraction Implicit Mapper.first_layer [dim].
-Extraction Implicit Mapper.qmapper [dim].
-Extraction Implicit Mapper.initial_qmap [dim].
-Extract Inlined Constant hd => "(fun d l -> match l with [] -> d | h :: _ -> h)".
-
 
 (* Perform extraction. *)
 Separate Extraction
-  UnitaryListRepresentation.last_single_qubit_gate
-  Main.check_well_typed Main.convert_to_ibm Main.convert_to_rzq 
-  Main.replace_rzq Main.decompose_to_cnot Main.count_gates Main.total_gate_count
-  Main.count_clifford_rzq Main.count_gates_lcr Main.optimize_1q_gates 
+  UnitaryListRepresentation.last_single_qubit_gate Main.check_well_typed 
+  Main.convert_to_ibm Main.convert_to_rzq Main.replace_rzq Main.decompose_to_cnot 
+  Main.count_1q Main.count_2q Main.count_3q Main.count_total Main.count_rzq_clifford 
+  Main.count_I Main.count_X Main.count_Y Main.count_Z Main.count_H Main.count_S
+  Main.count_T Main.count_Sdg Main.count_Tdg count_Rx count_Ry count_Rz count_Rzq
+  count_U1 count_U2 count_U3 count_CX count_CZ count_SWAP count_CCX count_CCZ
+  Main.optimize_1q_gates 
   Main.cx_cancellation Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
   Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
-  Main.check_layout Main.check_graph Main.check_constraints Main.simple_map
-  Main.make_tenerife Main.make_lnn Main.make_lnn_ring Main.make_grid
-  Main.trivial_layout Main.list_to_layout Main.layout_to_list
-  Mapper.initial_qmap.
+  Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
+  Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
+  Main.check_swap_equivalence Main.check_constraints.

@@ -17,16 +17,16 @@ let run_voqc d oc inf =
   let cg = make_grid 6 6 in
   let la = trivial_layout n in
   (* map only *)
-  let (c0, _) = simple_map c la cg in
+  let (c0, _) = swap_route c la cg in
   (* optimize -> map *)
   let c1 = optimize c in
-  let (c1, _) = simple_map c1 la cg in
+  let (c1, _) = swap_route c1 la cg in
   (* map -> optimize *)
-  let (c2, _) = simple_map c la cg in
+  let (c2, _) = swap_route c la cg in
   let c2 = optimize c2 in
   (* optimize -> map -> optimize *)
   let c3 = optimize_nam c in
-  let (c3, _) = simple_map c3 la cg in
+  let (c3, _) = swap_route c3 la cg in
   let c3 = optimize c3 in
   (* write output *)
   fprintf oc "%s,%d,%d,%d,%d,%d\n" inf (total_gate_count c) (total_gate_count c0) 

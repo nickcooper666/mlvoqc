@@ -4,8 +4,8 @@ module Qasm = Qasm
 (** Main entry point for VOQC. *)
 module Main = Main
 
-(** Standard gate set and related utility functions. *)
-module StandardGateSet = StandardGateSet
+(** Full gate set and related utility functions. *)
+module FullGateSet = FullGateSet
 
 (** IBM gate set. *)
 module IBMGateSet = IBMGateSet.IBMGateSet
@@ -15,8 +15,3 @@ module RzQGateSet = RzQGateSet.RzQGateSet
 
 (** Utilities for manipulating circuits (useful for defining custom optimizations). *)
 module UnitaryListRepresentation = UnitaryListRepresentation
-
-
-
-(* added for testing... *)
-module Mapper = Mapper

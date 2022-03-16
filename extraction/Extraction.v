@@ -344,4 +344,4 @@ Separate Extraction
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
   Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
   Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
-  Main.check_swap_equivalence Main.check_constraints.
+  Main.check_list Main.check_swap_equivalence Main.check_constraints.

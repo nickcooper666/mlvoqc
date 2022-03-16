@@ -23,9 +23,7 @@ let read_circ f n =
 let read_circ_and_layout f1 f2 =
   let (c, _) = read_qasm f1 in
   let l = read_layout f2 in
-  match list_to_layout l with
-  | None -> failwith "error reading input layout"
-  | Some lay -> (c, lay);;
+  (c, list_to_layout l);;
 
 printf "Checking handwritten tests...\n";;
 
@@ -117,7 +115,7 @@ let (c, trivl) = read_circ "qiskit1a.qasm" 7 in
 let cg = make_lnn 7 in
 let l = greedy_layout c cg in
 let _ = printf "\tGenerated layout: " in
-let _ = List.iter (fun x -> match x with Some x -> printf "%d " x | _ -> printf "X ") (layout_to_list l 7) in
+let _ = List.iter (printf "%d ") (layout_to_list l 7) in
 let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
 let c' = swap_route c l cg in
 let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in

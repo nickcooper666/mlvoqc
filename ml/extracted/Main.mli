@@ -256,18 +256,26 @@ val decompose_swaps : circ -> c_graph -> circ
     {i Verified Properties:} The output layout is well-formed. *)
 val trivial_layout : int -> layout
 
+(** Check if a list is a permutation over [[0...(n-1)]], meaning that it is valid input
+   to [list_to_layout].
+   
+   {i Verified Properties:} If [check_list] returns true, the layout output by 
+   [list_to_layout] is well-formed. *)
+val check_list : int list -> bool
+
 (** Make a layout from a list. Example: the list [[3; 4; 1; 2; 0]] is transformed 
    to a layout with physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\}
    (so physical qubit 0 stores logical qubit 3) and the appropriate inverse logical 
-   to physical mapping. Returns None if the input list is ill-formed. 
+   to physical mapping. 
    
-   {i Verified Properties:} The output layout is well-formed. *)
-val list_to_layout : int list -> layout option
+   {i Verified Properties:} If [check_list] returns true, the layout output by 
+   [list_to_layout] is well-formed.*)
+val list_to_layout : int list -> layout
 
 (** Convert a layout to a list for easier printing. Example: the layout with 
    physical to logical qubit mapping \{0->3, 1->4, 2->1, 3->2, 4->0\} is
    transformed to the list [[3; 4; 1; 2; 0]]. *)    
-val layout_to_list : layout -> int -> int option list
+val layout_to_list : layout -> int -> int list
 
 (** Choose an initial layout for a program that puts qubits close together on 
    the architecture if they are used together in a two-qubit gate. 

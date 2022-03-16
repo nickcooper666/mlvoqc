@@ -4,6 +4,7 @@ open GateCancellation
 open GreedyLayout
 open HadamardReduction
 open Layouts
+open List
 open MappingGateSet
 open MappingValidation
 open NotPropagation
@@ -470,15 +471,22 @@ let decompose_swaps c cg =
 let trivial_layout =
   trivial_layout
 
-(** val list_to_layout : int list -> layout option **)
+(** val check_list : int list -> bool **)
 
-let list_to_layout l =
-  if check_list l then Some (list_to_layout l) else None
+let check_list =
+  check_list
 
-(** val layout_to_list : layout -> int -> int option list **)
+(** val list_to_layout : Layouts.FMap.key list -> layout **)
+
+let list_to_layout =
+  list_to_layout
+
+(** val layout_to_list : layout -> int -> int list **)
 
 let layout_to_list lay n =
-  layout_to_list n lay
+  map (fun ox -> match ox with
+                 | Some x -> x
+                 | None -> 0) (layout_to_list n lay)
 
 (** val greedy_layout : circ -> c_graph -> layout **)
 

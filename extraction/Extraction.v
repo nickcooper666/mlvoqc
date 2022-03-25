@@ -272,6 +272,7 @@ Extraction Implicit SwapRoute.decompose_swaps_and_cnots_aux [dim].
 Extraction Implicit SwapRoute.decompose_swaps_and_cnots [dim].
 
 (* From MappingValidation.v *)
+Extraction Implicit MappingValidation.remove_swaps' [dim].
 Extraction Implicit MappingValidation.remove_swaps [dim].
 Extraction Implicit MappingValidation.check_swap_equivalence [dim].
 Extraction Implicit MappingValidation.is_swap_equivalent [dim].
@@ -343,5 +344,6 @@ Separate Extraction
   Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
   Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
-  Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
-  Main.check_list Main.check_swap_equivalence Main.check_constraints.
+  Main.list_to_layout Main.greedy_layout Main.lnn_c_graph Main.lnn_ext_c_graph Main.remove_swaps 
+  Main.check_list Main.check_swap_equivalence Main.check_constraints
+  Main.c_graph_from_coupling_map.

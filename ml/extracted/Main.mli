@@ -80,6 +80,7 @@ type layout
    You can construct a connectivity graph using [make_tenerife], [make_lnn], [make_lnn_ring],
    or [make_grid]. *)
 type c_graph
+type ext_c_graph
 
 (** {1 API} *)
 
@@ -241,7 +242,7 @@ val optimize_nam_lcr : circ -> ((circ * circ) * circ) option
     using the dimension stored in the input graph and the input layout and graph 
     are well-formed, this transformation preserves semantics (WT, perm) and preserves WT. 
     Furthermore, the output [c] respects the (undirected) constraints of the input graph. *)
-val swap_route : circ -> layout -> c_graph -> circ
+val swap_route : circ -> layout -> ext_c_graph -> circ
 
 (** Decompose swap gates and reorient cnot gates to satisfy connectivity constraints.
     
@@ -281,12 +282,15 @@ val layout_to_list : layout -> int -> int list
    the architecture if they are used together in a two-qubit gate. 
    
    {i Verified Properties:} The output layout is well-formed. *)
-val greedy_layout : circ -> c_graph -> layout
+val greedy_layout : circ -> ext_c_graph -> layout
 
 (** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
     
    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val make_lnn : int -> c_graph
+val lnn_c_graph : int -> c_graph
+val lnn_ext_c_graph : int -> ext_c_graph
+
+val c_graph_from_coupling_map : int -> (int * int) list -> c_graph
 
 (** Remove all swap gates from a program, instead performing a logical relabeling 
    of qubits. 

@@ -59,14 +59,16 @@ let decompose_swaps_and_cnots_aux is_in_graph g = match g with
    | UMap_CNOT ->
      if is_in_graph m n
      then (coq_CNOT m n) :: []
-     else (coq_H n) :: ((coq_H m) :: ((coq_CNOT n m) :: ((coq_H n) :: (
-            (coq_H m) :: []))))
+     else (coq_H m) :: ((coq_H n) :: ((coq_CNOT n m) :: ((coq_H m) :: (
+            (coq_H n) :: []))))
    | UMap_SWAP ->
      if is_in_graph m n
-     then (coq_CNOT m n) :: ((coq_H m) :: ((coq_H n) :: ((coq_CNOT m n) :: (
-            (coq_H m) :: ((coq_H n) :: ((coq_CNOT m n) :: []))))))
-     else (coq_CNOT n m) :: ((coq_H n) :: ((coq_H m) :: ((coq_CNOT n m) :: (
-            (coq_H n) :: ((coq_H m) :: ((coq_CNOT n m) :: [])))))))
+     then if is_in_graph n m
+          then (coq_CNOT m n) :: ((coq_CNOT n m) :: ((coq_CNOT m n) :: []))
+          else (coq_CNOT m n) :: ((coq_H n) :: ((coq_H m) :: ((coq_CNOT m n) :: (
+                 (coq_H n) :: ((coq_H m) :: ((coq_CNOT m n) :: []))))))
+     else (coq_CNOT n m) :: ((coq_H m) :: ((coq_H n) :: ((coq_CNOT n m) :: (
+            (coq_H m) :: ((coq_H n) :: ((coq_CNOT n m) :: [])))))))
 | _ -> g :: []
 
 (** val decompose_swaps_and_cnots :

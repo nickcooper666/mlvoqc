@@ -2,25 +2,28 @@ open Layouts
 open MappingGateSet
 open UnitaryListRepresentation
 
-(** val remove_swaps :
-    'a1 map_ucom_l -> layout -> 'a1 map_ucom_l * layout **)
+(** val remove_swaps' :
+    'a1 map_ucom_l -> layout -> 'a1 coq_Map_Unitary gate_app list -> 'a1
+    map_ucom_l * layout **)
 
-let rec remove_swaps l m =
+let rec remove_swaps' l m acc =
   match l with
-  | [] -> ([], m)
+  | [] -> ((List.rev_append acc []), m)
   | g :: t ->
     (match g with
-     | App1 (u, q) ->
-       let (t', m') = remove_swaps t m in
-       (((App1 (u, (get_log m q))) :: t'), m')
+     | App1 (u, q) -> remove_swaps' t m ((App1 (u, (get_log m q))) :: acc)
      | App2 (m0, q1, q2) ->
        (match m0 with
         | UMap_U _ -> ([], m)
         | UMap_CNOT ->
-          let (t', m') = remove_swaps t m in
-          (((coq_CNOT (get_log m q1) (get_log m q2)) :: t'), m')
-        | UMap_SWAP -> remove_swaps t (swap_log m q1 q2))
+          remove_swaps' t m ((coq_CNOT (get_log m q1) (get_log m q2)) :: acc)
+        | UMap_SWAP -> remove_swaps' t (swap_log m q1 q2) acc)
      | App3 (_, _, _, _) -> ([], m))
+
+(** val remove_swaps : 'a1 map_ucom_l -> layout -> 'a1 map_ucom_l * layout **)
+
+let remove_swaps l m =
+  remove_swaps' l m []
 
 (** val check_swap_equivalence :
     'a1 map_ucom_l -> 'a1 map_ucom_l -> layout -> layout -> (int -> 'a1

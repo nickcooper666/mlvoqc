@@ -102,9 +102,9 @@ else printf "\tFAILED\n";;
 
 printf "Trying trivial layout\n";
 let (c, l) = read_circ "qiskit1a.qasm" 7 in
-let cg = make_lnn 7 in
+let ecg = lnn_ext_c_graph 7 in
 let _ = printf "\tInitial 2q gates: %d\n" (count_2q c) in
-let c' = swap_route c l cg in
+let c' = swap_route c l ecg in
 let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
 if check_swap_equivalence c c' l l
 then printf "\tEquivalence checks passed\n"
@@ -112,13 +112,20 @@ else printf "\tEquivalence checks failed\n";;
 
 printf "Trying greedy layout\n";
 let (c, trivl) = read_circ "qiskit1a.qasm" 7 in
-let cg = make_lnn 7 in
-let l = greedy_layout c cg in
+let ecg = lnn_ext_c_graph 7 in
+let l = greedy_layout c ecg in
 let _ = printf "\tGenerated layout: " in
 let _ = List.iter (printf "%d ") (layout_to_list l 7) in
 let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
-let c' = swap_route c l cg in
+let c' = swap_route c l ecg in
 let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
 if check_swap_equivalence c c' trivl l
 then printf "\tEquivalence checks passed\n"
 else printf "\tEquivalence checks failed\n";;
+
+let test1 = check_list [0; 1; 2; 3; 4] in
+let test2 = not (check_list [0; 1; 2; 2; 4]) in
+let test3 = check_list [1; 4; 0; 2; 3] in
+if test1 && test2 && test3
+then printf "check_list tests passed\n"
+else printf "check_list tests failed\n";;

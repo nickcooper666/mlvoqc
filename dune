@@ -12,3 +12,8 @@
   (name mapper_test)
   (modules mapper_test)
   (libraries voqc str))
+
+(executable
+  (name run_vqo)
+  (modules run_vqo)
+  (libraries voqc))

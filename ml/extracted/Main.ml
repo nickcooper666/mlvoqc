@@ -15,37 +15,6 @@ open UnitaryListRepresentation
 
 type circ = FullGateSet.full_ucom_l
 
-type layout = Layouts.layout
-
-type c_graph =
-  (((int * (int -> int -> int list)) * (int -> int -> bool)) * int
-  list) * (int -> int list)
-
-(** val graph_dim : c_graph -> int **)
-
-let graph_dim cg =
-  fst (fst (fst (fst cg)))
-
-(** val get_path : c_graph -> int -> int -> int list **)
-
-let get_path cg =
-  snd (fst (fst (fst cg)))
-
-(** val is_in_graph : c_graph -> int -> int -> bool **)
-
-let is_in_graph cg =
-  snd (fst (fst cg))
-
-(** val qubit_ordering : c_graph -> int list **)
-
-let qubit_ordering cg =
-  snd (fst cg)
-
-(** val get_nearby_qubits : c_graph -> int -> int list **)
-
-let get_nearby_qubits =
-  snd
-
 (** val check_well_typed : circ -> int -> bool **)
 
 let check_well_typed c n =
@@ -450,13 +419,51 @@ let optimize_nam_light c =
 let optimize_nam_lcr c =
   coq_LCR c optimize_nam FullGateSet.FullGateSet.match_gate
 
-(** val swap_route : circ -> layout -> c_graph -> FullGateSet.full_ucom_l **)
+type layout = Layouts.layout
 
-let swap_route c lay cg =
-  let n = graph_dim cg in
+type c_graph = int * (int -> int -> bool)
+
+(** val graph_dim : c_graph -> int **)
+
+let graph_dim =
+  fst
+
+(** val is_in_graph : c_graph -> int -> int -> bool **)
+
+let is_in_graph =
+  snd
+
+type ext_c_graph =
+  ((c_graph * (int -> int -> int list)) * int list) * (int -> int list)
+
+(** val get_c_graph : ext_c_graph -> c_graph **)
+
+let get_c_graph ecg =
+  fst (fst (fst ecg))
+
+(** val get_path : ext_c_graph -> int -> int -> int list **)
+
+let get_path ecg =
+  snd (fst (fst ecg))
+
+(** val qubit_ordering : ext_c_graph -> int list **)
+
+let qubit_ordering ecg =
+  snd (fst ecg)
+
+(** val get_nearby_qubits : ext_c_graph -> int -> int list **)
+
+let get_nearby_qubits =
+  snd
+
+(** val swap_route :
+    circ -> layout -> ext_c_graph -> FullGateSet.full_ucom_l **)
+
+let swap_route c lay ecg =
+  let n = graph_dim (get_c_graph ecg) in
   let (c0, _) =
     swap_route (FullGateSet.full_to_map ((fun x _ -> x) c n)) lay
-      (get_path cg)
+      (get_path ecg)
   in
   FullGateSet.map_to_full c0
 
@@ -488,16 +495,31 @@ let layout_to_list lay n =
                  | Some x -> x
                  | None -> 0) (layout_to_list n lay)
 
-(** val greedy_layout : circ -> c_graph -> layout **)
+(** val greedy_layout : circ -> ext_c_graph -> layout **)
 
-let greedy_layout c cg =
-  greedy_layout (FullGateSet.full_to_map c) (graph_dim cg)
-    (get_nearby_qubits cg) (qubit_ordering cg)
+let greedy_layout c ecg =
+  greedy_layout (FullGateSet.full_to_map c) (graph_dim (get_c_graph ecg))
+    (get_nearby_qubits ecg) (qubit_ordering ecg)
 
-(** val make_lnn : int -> c_graph **)
+(** val beq_tup : (int * int) -> (int * int) -> bool **)
 
-let make_lnn n =
-  ((((n, LNN.get_path), (LNN.is_in_graph n)), (LNN.qubit_ordering n)),
+let beq_tup t t' =
+  let (n1, n2) = t in let (n1', n2') = t' in (&&) ((=) n1 n1') ((=) n2 n2')
+
+(** val c_graph_from_coupling_map : int -> (int * int) list -> c_graph **)
+
+let c_graph_from_coupling_map n cmap =
+  (n, (fun n1 n2 -> List.exists (beq_tup (n1, n2)) cmap))
+
+(** val lnn_c_graph : int -> c_graph **)
+
+let lnn_c_graph n =
+  (n, (LNN.is_in_graph n))
+
+(** val lnn_ext_c_graph : int -> ext_c_graph **)
+
+let lnn_ext_c_graph n =
+  ((((lnn_c_graph n), LNN.get_path), (LNN.qubit_ordering n)),
     (LNN.get_nearby n))
 
 (** val remove_swaps : circ -> layout -> FullGateSet.full_ucom_l **)

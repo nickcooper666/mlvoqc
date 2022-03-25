@@ -28,8 +28,8 @@ rm -f BinNums.ml ClassicalDedekindReals.ml ConstructiveCauchyReals.ml \
       Rtrigo_def.ml Specif.ml ZArith_dec.ml
 
 # Move remaining extracted files to the ml/extracted directory.
-mv Bin*.ml CXCancellation.ml ChangeRotationBasis.ml ConnectivityGraph.ml Datatypes.ml \
-   FullGateSet.ml GateCancellation.ml GreedyLayout.ml HadamardReduction.ml IBMGateSet.ml \
-   Layouts.ml Main.ml MappingGateSet.ml MappingValidation.ml NotPropagation.ml Optimize1qGates.ml \
+mv Bin*.ml ChangeRotationBasis.ml ConnectivityGraph.ml Datatypes.ml FullGateSet.ml \
+   GateCancellation.ml GreedyLayout.ml HadamardReduction.ml IBMGateSet.ml Layouts.ml \
+   Main.ml MappingGateSet.ml MappingValidation.ml NotPropagation.ml Optimize1qGates.ml \
    PeanoNat.ml RotationMerging.ml RzQGateSet.ml SwapRoute.ml UnitaryListRepresentation.ml \
    ../ml/extracted

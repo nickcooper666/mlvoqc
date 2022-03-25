@@ -71,16 +71,13 @@ type circ = FullGateSet.coq_Full_Unitary gate_list
    You can construct a layout using the function [list_to_layout]. *)
 type layout
 
-(** A {i connectivity graph} ([c_graph]) is a triple [ nat * (nat -> nat -> list nat) * (nat -> nat -> bool)], 
-   which consists of the total number of qubits in the system, a function to generate an 
-   undirected path between any two qubits, and an oracle that indicates whether a directed 
-   edge exists between two qubits. A connectivity graph is {i well-formed} if the 
-   function to get paths returns a valid path between any two qubits in the system. 
+(** A {i connectivity graph} ([c_graph]) is a apr [ nat * (nat -> nat -> bool)], 
+   that consists of the total number of qubits in the system and a an oracle that 
+   indicates whether a directed edge exists between two qubits.
    
    You can construct a connectivity graph using [make_tenerife], [make_lnn], [make_lnn_ring],
    or [make_grid]. *)
 type c_graph
-type ext_c_graph
 
 (** {1 API} *)
 
@@ -160,17 +157,6 @@ val count_rzq_clifford : circ -> int
    routine, which merges adjacent 1-qubit gates. Internally uses the IBM gate set. 
    
    {i Verified Properties:} Preserves semantics (WT, phase), preserves WT, preserves mapping *)
-val optimize_1q_gates : circ -> circ
-
-(** Implementation of Qiskit's {{:https://qiskit.org/documentation/stubs/qiskit.transpiler.passes.CXCancellation.html}CXCancellation} 
-   routine,  which cancels adjacent CX gates. Internally uses the IBM gate set. 
-   
-   {i Verified Properties:} Preserves semantics (WT), preserves WT, preserves mapping *)
-val cx_cancellation : circ -> circ
-
-(** Run [optimize_1q_gates] followed by [cx_cancellation].
-   
-   {i Verified Properties:} Preserves semantics (WT, phase), preserves WT, preserves mapping *)
 val optimize_ibm : circ -> circ
 
 (** Implementation of Nam et al.'s "NOT propagation," which commutes X gates rightward 
@@ -242,7 +228,7 @@ val optimize_nam_lcr : circ -> ((circ * circ) * circ) option
     using the dimension stored in the input graph and the input layout and graph 
     are well-formed, this transformation preserves semantics (WT, perm) and preserves WT. 
     Furthermore, the output [c] respects the (undirected) constraints of the input graph. *)
-val swap_route : circ -> layout -> ext_c_graph -> circ
+val swap_route : circ -> layout -> c_graph -> (int -> int -> int list) -> circ
 
 (** Decompose swap gates and reorient cnot gates to satisfy connectivity constraints.
     
@@ -282,13 +268,12 @@ val layout_to_list : layout -> int -> int list
    the architecture if they are used together in a two-qubit gate. 
    
    {i Verified Properties:} The output layout is well-formed. *)
-val greedy_layout : circ -> ext_c_graph -> layout
+val greedy_layout : circ -> c_graph -> (int -> int list) -> int list -> layout
 
 (** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
     
    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val lnn_c_graph : int -> c_graph
-val lnn_ext_c_graph : int -> ext_c_graph
+val make_lnn : int -> c_graph
 
 val c_graph_from_coupling_map : int -> (int * int) list -> c_graph
 

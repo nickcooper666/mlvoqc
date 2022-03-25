@@ -3,6 +3,7 @@
 open Printf
 open Voqc.Qasm
 open Voqc.Main
+open Voqc.ConnectivityGraph
 
 let _ = Sys.chdir "mapping_validation_tests";;
 
@@ -102,9 +103,9 @@ else printf "\tFAILED\n";;
 
 printf "Trying trivial layout\n";
 let (c, l) = read_circ "qiskit1a.qasm" 7 in
-let ecg = lnn_ext_c_graph 7 in
+let cg = make_lnn 7 in
 let _ = printf "\tInitial 2q gates: %d\n" (count_2q c) in
-let c' = swap_route c l ecg in
+let c' = swap_route c l cg LNN.get_path in
 let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
 if check_swap_equivalence c c' l l
 then printf "\tEquivalence checks passed\n"
@@ -112,12 +113,12 @@ else printf "\tEquivalence checks failed\n";;
 
 printf "Trying greedy layout\n";
 let (c, trivl) = read_circ "qiskit1a.qasm" 7 in
-let ecg = lnn_ext_c_graph 7 in
-let l = greedy_layout c ecg in
+let cg = make_lnn 7 in
+let l = greedy_layout c cg (LNN.get_nearby 7) (LNN.qubit_ordering 7) in
 let _ = printf "\tGenerated layout: " in
 let _ = List.iter (printf "%d ") (layout_to_list l 7) in
 let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
-let c' = swap_route c l ecg in
+let c' = swap_route c l cg LNN.get_path in
 let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
 if check_swap_equivalence c c' trivl l
 then printf "\tEquivalence checks passed\n"

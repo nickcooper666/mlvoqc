@@ -1,5 +1,4 @@
 Require Coq.extraction.Extraction.
-Require Import CXCancellation.
 Require Import ChangeRotationBasis.
 Require Import ConnectivityGraph.
 Require Import FullGateSet.
@@ -223,10 +222,6 @@ Extraction Implicit Optimize1qGates.optimize_1q_gates' [dim].
 Extraction Implicit Optimize1qGates.simplify_1q_gates [dim].
 Extraction Implicit Optimize1qGates.optimize_1q_gates [dim].
 
-(* From CXCancellation.v *)
-Extraction Implicit CXCancellation.cx_cancellation' [dim].
-Extraction Implicit CXCancellation.cx_cancellation [dim].
-
 (* From MappingGateSet.v *)
 Extraction Implicit MappingGateSet.CNOT [dim].
 Extraction Implicit MappingGateSet.SWAP [dim].
@@ -313,8 +308,6 @@ Extraction Implicit Main.count_2q [dim].
 Extraction Implicit Main.count_3q [dim].
 Extraction Implicit Main.count_total [dim].
 Extraction Implicit Main.count_rzq_clifford [dim].
-Extraction Implicit Main.optimize_1q_gates [dim].
-Extraction Implicit Main.cx_cancellation [dim].
 Extraction Implicit Main.optimize_ibm [dim].
 Extraction Implicit Main.not_propagation [dim].
 Extraction Implicit Main.hadamard_reduction [dim].
@@ -333,17 +326,17 @@ Extraction Implicit Main.check_constraints [dim].
 
 (* Perform extraction. *)
 Separate Extraction
+  ConnectivityGraph.LNN
   UnitaryListRepresentation.last_single_qubit_gate Main.check_well_typed 
   Main.convert_to_ibm Main.convert_to_rzq Main.replace_rzq Main.decompose_to_cnot 
   Main.count_1q Main.count_2q Main.count_3q Main.count_total Main.count_rzq_clifford 
   Main.count_I Main.count_X Main.count_Y Main.count_Z Main.count_H Main.count_S
   Main.count_T Main.count_Sdg Main.count_Tdg count_Rx count_Ry count_Rz count_Rzq
   count_U1 count_U2 count_U3 count_CX count_CZ count_SWAP count_CCX count_CCZ
-  Main.optimize_1q_gates 
-  Main.cx_cancellation Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
+  Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
   Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
   Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
   Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
-  Main.list_to_layout Main.greedy_layout Main.lnn_c_graph Main.lnn_ext_c_graph Main.remove_swaps 
+  Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
   Main.check_list Main.check_swap_equivalence Main.check_constraints
   Main.c_graph_from_coupling_map.

@@ -15,3 +15,6 @@ module RzQGateSet = RzQGateSet.RzQGateSet
 
 (** Utilities for manipulating circuits (useful for defining custom optimizations). *)
 module UnitaryListRepresentation = UnitaryListRepresentation
+
+(** Basic connectivity graphs. *)
+module ConnectivityGraph = ConnectivityGraph

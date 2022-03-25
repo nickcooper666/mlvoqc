@@ -420,6 +420,11 @@ let optimize_nam_light c =
 let optimize_nam_lcr c =
   coq_LCR c optimize_nam FullGateSet.FullGateSet.match_gate
 
+(** val optimize : circ -> circ **)
+
+let optimize c =
+  optimize_ibm (optimize_nam c)
+
 (** val swap_route :
     circ -> layout -> c_graph -> (int -> int -> int list) ->
     FullGateSet.full_ucom_l **)

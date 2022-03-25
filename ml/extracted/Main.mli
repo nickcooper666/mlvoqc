@@ -220,6 +220,11 @@ val optimize_nam_light : circ -> circ
     are also properly mapped. *)
 val optimize_nam_lcr : circ -> ((circ * circ) * circ) option
 
+(** [optimize_nam] followed by [optimize_ibm].
+   
+   {i Verified Properties:} Preserves semantics (WT, phase), preserves WT, preserves mapping *)
+val optimize : circ -> circ
+
 (** {2 Mapping Functions} *)
 
 (** Map a circuit to an architecture given an initial layout.

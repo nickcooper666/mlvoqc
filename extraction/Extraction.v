@@ -317,6 +317,7 @@ Extraction Implicit Main.merge_rotations [dim].
 Extraction Implicit Main.optimize_nam [dim].
 Extraction Implicit Main.optimize_nam_light [dim].
 Extraction Implicit Main.optimize_nam_lcr [dim].
+Extraction Implicit Main.optimize [dim].
 Extraction Implicit Main.swap_route [dim].
 Extraction Implicit Main.decompose_swaps [dim].
 Extraction Implicit Main.greedy_layout [dim].
@@ -335,7 +336,7 @@ Separate Extraction
   count_U1 count_U2 count_U3 count_CX count_CZ count_SWAP count_CCX count_CCZ
   Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
   Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
-  Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr
+  Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr Main.optimize
   Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
   Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
   Main.check_list Main.check_swap_equivalence Main.check_constraints

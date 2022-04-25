@@ -273,12 +273,24 @@ val layout_to_list : layout -> int -> int list
    the architecture if they are used together in a two-qubit gate. 
    
    {i Verified Properties:} The output layout is well-formed. *)
-val greedy_layout : circ -> c_graph -> (int -> int list) -> int list -> layout
+val greedy_layout : circ -> c_graph -> (int option -> int list) -> layout
 
 (** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
     
    {i Verified Properties:} The output connectivity graph is well-formed. *)
 val make_lnn : int -> c_graph
+
+(*
+(** Create a 1D LNN ring graph with n qubits (see POPL VOQC Fig 8(c)).
+    
+    {i Verified Properties:} The output connectivity graph is well-formed. *)
+val make_lnn_ring : int -> c_graph
+
+(** Create a m x n 2D grid (see POPL VOQC Fig 8(d)).
+    
+    {i Verified Properties:} The output connectivity graph is well-formed. *)
+val make_grid : int -> int -> c_graph
+*)
 
 val c_graph_from_coupling_map : int -> (int * int) list -> c_graph
 
@@ -303,19 +315,3 @@ val check_swap_equivalence : circ -> circ -> layout -> layout -> bool
    the constraints of the connectivity graph. *)
 val check_constraints : circ -> c_graph -> bool
 
-(*
-(** Create a graph for {{:https://github.com/Qiskit/ibmq-device-information/blob/master/backends/tenerife/V1/version_log.md}IBM's 5-qubit Tenerife machine}).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val make_tenerife : unit -> c_graph
-
-(** Create a 1D LNN ring graph with n qubits (see POPL VOQC Fig 8(c)).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val make_lnn_ring : int -> c_graph
-
-(** Create a m x n 2D grid (see POPL VOQC Fig 8(d)).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
-val make_grid : int -> int -> c_graph
-*)

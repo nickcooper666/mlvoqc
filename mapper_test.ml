@@ -4,6 +4,8 @@ open Printf
 open Voqc.Qasm
 open Voqc.Main
 open Voqc.ConnectivityGraph
+open Voqc.UnitaryListRepresentation
+open Voqc.FullGateSet
 
 let _ = Sys.chdir "mapping_validation_tests";;
 
@@ -114,7 +116,7 @@ else printf "\tEquivalence checks failed\n";;
 printf "Trying greedy layout\n";
 let (c, trivl) = read_circ "qiskit1a.qasm" 7 in
 let cg = make_lnn 7 in
-let l = greedy_layout c cg (LNN.get_nearby 7) (LNN.qubit_ordering 7) in
+let l = greedy_layout c cg (fun o -> match o with Some n -> LNN.get_nearby 7 n | _ -> LNN.qubit_ordering 7) in
 let _ = printf "\tGenerated layout: " in
 let _ = List.iter (printf "%d ") (layout_to_list l 7) in
 let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
@@ -130,3 +132,36 @@ let test3 = check_list [1; 4; 0; 2; 3] in
 if test1 && test2 && test3
 then printf "check_list tests passed\n"
 else printf "check_list tests failed\n";;
+
+let print_gate g = 
+  match g with 
+  | App2 (U_CX,m,n) -> printf "CX %d %d\n" m n 
+  | App2 (U_SWAP,m,n) -> printf "SWAP %d %d\n" m n 
+  | App1 (U_H,m) -> printf "H %d\n" m 
+  | _ -> printf "other gate\n";; 
+
+printf "Testing example from paper...\n";
+let c = [App2 (U_CX, 0, 2); App2 (U_CX, 2, 1); App1 (U_H, 0); App2 (U_CX, 2, 3)] in
+let cg = make_lnn 4 in
+(*let l = greedy_layout c cg (fun o -> match o with Some n -> LNN.get_nearby 4 n | _ -> LNN.qubit_ordering 4) in
+let _ = printf "\tGenerated layout: " in
+let _ = List.iter (printf "%d ") (layout_to_list l 4) in
+let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
+let c' = swap_route c l cg LNN.get_path in*)
+let c' = [App2 (U_CX, 0, 1); App2 (U_CX, 1, 2); App1 (U_H, 0); App2 (U_SWAP, 1, 2); App2 (U_CX, 2, 3)] in
+let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
+let _ = List.iter print_gate c' in
+let _ = printf "===========\n" in
+let c'' = decompose_swaps c' cg in
+let _ = List.iter print_gate c'' in
+let l = trivial_layout 4 in
+let _ = printf "\tGenerated layout: " in
+let _ = List.iter (printf "%d ") (layout_to_list l 4) in
+let _ = printf "\n\tInitial 2q gates: %d\n" (count_2q c) in
+let c' = swap_route c l cg LNN.get_path in
+let _ = printf "\tAfter routing 2q gates: %d\n" (count_2q c') in
+let _ = List.iter print_gate c' in
+let _ = printf "===========\n" in
+let c'' = decompose_swaps c' cg in
+let _ = List.iter print_gate c'' in
+()

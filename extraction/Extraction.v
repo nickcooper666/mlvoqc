@@ -263,6 +263,9 @@ Extraction Implicit GreedyLayout.greedy_layout [dim].
 Extraction Implicit SwapRoute.path_to_swaps [dim].
 Extraction Implicit SwapRoute.swap_route [dim].
 Extraction Implicit SwapRoute.H [dim].
+Extraction Implicit SwapRoute.cancel_cnots_with_swaps' [dim].
+Extraction Implicit SwapRoute.fuel_aux [dim].
+Extraction Implicit SwapRoute.cancel_cnots_with_swaps [dim].
 Extraction Implicit SwapRoute.decompose_swaps_and_cnots_aux [dim].
 Extraction Implicit SwapRoute.decompose_swaps_and_cnots [dim].
 

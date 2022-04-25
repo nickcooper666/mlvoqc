@@ -5,7 +5,7 @@ module Qasm = Qasm
 module Main = Main
 
 (** Full gate set and related utility functions. *)
-module FullGateSet = FullGateSet
+module FullGateSet = FullGateSet.FullGateSet
 
 (** IBM gate set. *)
 module IBMGateSet = IBMGateSet.IBMGateSet

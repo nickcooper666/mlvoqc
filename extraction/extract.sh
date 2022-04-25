@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Make sure the SQIR submodule is up to date
-git submodule init
-git submodule update
+# git submodule init
+# git submodule update
 
 # Change into the SQIR directory
 cd SQIR

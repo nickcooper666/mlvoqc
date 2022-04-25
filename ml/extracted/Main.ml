@@ -465,11 +465,10 @@ let layout_to_list lay n =
                  | None -> 0) (layout_to_list n lay)
 
 (** val greedy_layout :
-    circ -> c_graph -> (int -> int list) -> int list -> layout **)
+    circ -> c_graph -> (int option -> int list) -> layout **)
 
-let greedy_layout c cg get_nearby qubit_ordering =
-  greedy_layout (FullGateSet.full_to_map c) (graph_dim cg) get_nearby
-    qubit_ordering
+let greedy_layout c cg q_ordering =
+  greedy_layout (FullGateSet.full_to_map c) (graph_dim cg) q_ordering
 
 (** val beq_tup : (int * int) -> (int * int) -> bool **)
 

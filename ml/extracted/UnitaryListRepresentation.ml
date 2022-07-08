@@ -230,6 +230,16 @@ let remove_suffix l sfx match_gate =
   | Some l0 -> Some (List.rev_append l0 [])
   | None -> None
 
+(** val equalb :
+    'a1 gate_list -> 'a1 gate_list -> (int -> 'a1 -> 'a1 -> bool) -> bool **)
+
+let equalb l1 l2 match_gate =
+  match remove_prefix l1 l2 match_gate with
+  | Some g -> (match g with
+               | [] -> true
+               | _ :: _ -> false)
+  | None -> false
+
 (** val replace_pattern :
     'a1 gate_list -> 'a1 gate_list -> 'a1 gate_list -> (int -> 'a1 -> 'a1 ->
     bool) -> 'a1 gate_list option **)

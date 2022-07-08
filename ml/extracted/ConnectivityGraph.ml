@@ -1,4 +1,16 @@
+open Layouts
 open PeanoNat
+
+(** val list_nats : int -> int option -> int list **)
+
+let rec list_nats n o =
+  (fun fO fS n -> if n=0 then fO () else fS (n-1))
+    (fun _ -> [])
+    (fun n' ->
+    match o with
+    | Some x -> if (=) x n' then list_nats n' o else n' :: (list_nats n' o)
+    | None -> n' :: (list_nats n' o))
+    n
 
 (** val merge_path : int list -> int list -> int list **)
 
@@ -9,56 +21,15 @@ let rec merge_path p1 p2 =
                | [] -> p2
                | _ :: _ -> h :: (merge_path t p2))
 
-(** val check_path :
-    int list -> int -> (int -> int -> bool) -> int -> bool **)
+(** val interleave : int list -> int list -> int list **)
 
-let rec check_path p n2 is_in_graph0 dim =
-  match p with
-  | [] -> false
-  | x :: t ->
-    (match t with
-     | [] -> false
-     | y :: l ->
-       (match l with
-        | [] ->
-          (&&)
-            ((&&)
-              ((&&)
-                ((&&) ((||) (is_in_graph0 x y) (is_in_graph0 y x))
-                  (Nat.ltb x dim)) (Nat.ltb y dim)) (not ((=) x y)))
-            ((=) y n2)
-        | _ :: _ ->
-          (&&)
-            ((&&)
-              ((&&)
-                ((&&)
-                  ((&&)
-                    ((&&) ((||) (is_in_graph0 x y) (is_in_graph0 y x))
-                      (Nat.ltb x dim)) (Nat.ltb y dim)) (not ((=) x y)))
-                (not ((=) x n2))) (not ((=) y n2)))
-            (check_path t n2 is_in_graph0 dim)))
-
-(** val foralln : (int -> bool) -> int -> bool **)
-
-let rec foralln f n =
-  (fun fO fS n -> if n=0 then fO () else fS (n-1))
-    (fun _ -> true)
-    (fun n' -> (&&) (f n') (foralln f n'))
-    n
-
-(** val check_graph :
-    int -> (int -> int -> int list) -> (int -> int -> bool) -> bool **)
-
-let check_graph dim get_path0 is_in_graph0 =
-  let f = fun n1 n2 ->
-    if (=) n1 n2
-    then true
-    else (match get_path0 n1 n2 with
-          | [] -> false
-          | x :: _ ->
-            (&&) ((=) x n1) (check_path (get_path0 n1 n2) n2 is_in_graph0 dim))
-  in
-  foralln (fun n1 -> foralln (fun n2 -> f n1 n2) dim) dim
+let rec interleave l1 l2 =
+  match l1 with
+  | [] -> l2
+  | h1 :: t1 ->
+    (match l2 with
+     | [] -> l1
+     | h2 :: t2 -> h1 :: (h2 :: (interleave t1 t2)))
 
 module LNN =
  struct
@@ -92,7 +63,38 @@ module LNN =
   let get_path n1 n2 =
     if Nat.ltb n1 n2
     then move_right n1 ((-) n2 n1)
-    else if Nat.ltb n2 n1 then move_left n1 ((-) n1 n2) else []
+    else if Nat.ltb n2 n1 then move_left n1 ((-) n1 n2) else n1 :: []
+
+  (** val get_nearby : int -> int -> int list **)
+
+  let get_nearby dim n =
+    if not (Nat.ltb n dim)
+    then list_nats dim None
+    else if Nat.ltb dim (Pervasives.succ (Pervasives.succ 0))
+         then []
+         else if (=) n 0
+              then get_path (Pervasives.succ 0) ((-) dim (Pervasives.succ 0))
+              else if (=) n ((-) dim (Pervasives.succ 0))
+                   then get_path
+                          ((-) dim (Pervasives.succ (Pervasives.succ 0))) 0
+                   else interleave (get_path ((-) n (Pervasives.succ 0)) 0)
+                          (get_path ((+) n (Pervasives.succ 0))
+                            ((-) dim (Pervasives.succ 0)))
+
+  (** val q_ordering : int -> int option -> int list **)
+
+  let q_ordering dim = function
+  | Some x -> get_nearby dim x
+  | None ->
+    if (=) dim 0
+    then []
+    else (Nat.div dim (Pervasives.succ (Pervasives.succ 0))) :: (get_nearby
+                                                                  dim
+                                                                  (Nat.div
+                                                                    dim
+                                                                    (Pervasives.succ
+                                                                    (Pervasives.succ
+                                                                    0))))
  end
 
 module LNNRing =
@@ -141,7 +143,46 @@ module LNNRing =
               if Nat.ltb dist_cw dist_ccw
               then move_cw dim n1 dist_cw
               else move_ccw dim n1 dist_ccw
-         else []
+         else n1 :: []
+
+  (** val get_nearby : int -> int -> int list **)
+
+  let get_nearby dim n =
+    if not (Nat.ltb n dim)
+    then list_nats dim None
+    else if Nat.ltb dim (Pervasives.succ (Pervasives.succ 0))
+         then []
+         else let mid = Nat.div dim (Pervasives.succ (Pervasives.succ 0)) in
+              interleave
+                (move_ccw dim
+                  (Nat.modulo ((-) ((+) dim n) (Pervasives.succ 0)) dim)
+                  ((-) mid (Pervasives.succ 0)))
+                (move_cw dim (Nat.modulo ((+) n (Pervasives.succ 0)) dim)
+                  ((-) ((-) dim mid) (Pervasives.succ (Pervasives.succ 0))))
+
+  (** val q_ordering' : int -> int option -> int list **)
+
+  let q_ordering' dim = function
+  | Some x -> get_nearby dim x
+  | None -> if (=) dim 0 then [] else 0 :: (get_nearby dim 0)
+
+  (** val q_ordering : int -> int option -> int list **)
+
+  let q_ordering dim o =
+    let attempt = q_ordering' dim o in
+    let backup = list_nats dim o in
+    (match o with
+     | Some x ->
+       if Nat.ltb x dim
+       then if (&&) ((=) (List.length attempt) ((-) dim (Pervasives.succ 0)))
+                 (check_list (x :: attempt))
+            then attempt
+            else backup
+       else backup
+     | None ->
+       if (&&) ((=) (List.length attempt) dim) (check_list attempt)
+       then attempt
+       else backup)
  end
 
 module Grid =
@@ -258,186 +299,4 @@ module Grid =
                                                  in
                                                  merge_path p1 p2
                                             else []
- end
-
-module Tenerife =
- struct
-  (** val tenerife_graph : (int * int) list **)
-
-  let tenerife_graph =
-    ((Pervasives.succ 0), 0) :: (((Pervasives.succ (Pervasives.succ 0)),
-      0) :: (((Pervasives.succ (Pervasives.succ 0)), (Pervasives.succ
-      0)) :: (((Pervasives.succ (Pervasives.succ (Pervasives.succ 0))),
-      (Pervasives.succ (Pervasives.succ 0))) :: (((Pervasives.succ
-      (Pervasives.succ (Pervasives.succ 0))), (Pervasives.succ
-      (Pervasives.succ (Pervasives.succ (Pervasives.succ
-      0))))) :: (((Pervasives.succ (Pervasives.succ (Pervasives.succ
-      (Pervasives.succ 0)))), (Pervasives.succ (Pervasives.succ
-      0))) :: [])))))
-
-  (** val beq_tup : (int * int) -> (int * int) -> bool **)
-
-  let beq_tup t t' =
-    let (n1, n2) = t in let (n1', n2') = t' in (&&) ((=) n1 n1') ((=) n2 n2')
-
-  (** val is_in_graph : int -> int -> bool **)
-
-  let is_in_graph n1 n2 =
-    List.exists (beq_tup (n1, n2)) tenerife_graph
-
-  (** val get_path : int -> int -> int list **)
-
-  let get_path n1 n2 =
-    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-      (fun _ ->
-      (fun fO fS n -> if n=0 then fO () else fS (n-1))
-        (fun _ -> [])
-        (fun n ->
-        (fun fO fS n -> if n=0 then fO () else fS (n-1))
-          (fun _ -> 0 :: ((Pervasives.succ 0) :: []))
-          (fun n0 ->
-          (fun fO fS n -> if n=0 then fO () else fS (n-1))
-            (fun _ -> 0 :: ((Pervasives.succ (Pervasives.succ
-            0)) :: []))
-            (fun n3 ->
-            (fun fO fS n -> if n=0 then fO () else fS (n-1))
-              (fun _ -> 0 :: ((Pervasives.succ (Pervasives.succ
-              0)) :: ((Pervasives.succ (Pervasives.succ (Pervasives.succ
-              0))) :: [])))
-              (fun n4 ->
-              (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                (fun _ -> 0 :: ((Pervasives.succ (Pervasives.succ
-                0)) :: ((Pervasives.succ (Pervasives.succ (Pervasives.succ
-                (Pervasives.succ 0)))) :: [])))
-                (fun _ -> [])
-                n4)
-              n3)
-            n0)
-          n)
-        n2)
-      (fun n ->
-      (fun fO fS n -> if n=0 then fO () else fS (n-1))
-        (fun _ ->
-        (fun fO fS n -> if n=0 then fO () else fS (n-1))
-          (fun _ -> (Pervasives.succ 0) :: (0 :: []))
-          (fun n0 ->
-          (fun fO fS n -> if n=0 then fO () else fS (n-1))
-            (fun _ -> [])
-            (fun n3 ->
-            (fun fO fS n -> if n=0 then fO () else fS (n-1))
-              (fun _ -> (Pervasives.succ 0) :: ((Pervasives.succ
-              (Pervasives.succ 0)) :: []))
-              (fun n4 ->
-              (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                (fun _ -> (Pervasives.succ 0) :: ((Pervasives.succ
-                (Pervasives.succ 0)) :: ((Pervasives.succ (Pervasives.succ
-                (Pervasives.succ 0))) :: [])))
-                (fun n5 ->
-                (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                  (fun _ -> (Pervasives.succ 0) :: ((Pervasives.succ
-                  (Pervasives.succ 0)) :: ((Pervasives.succ (Pervasives.succ
-                  (Pervasives.succ (Pervasives.succ 0)))) :: [])))
-                  (fun _ -> [])
-                  n5)
-                n4)
-              n3)
-            n0)
-          n2)
-        (fun n0 ->
-        (fun fO fS n -> if n=0 then fO () else fS (n-1))
-          (fun _ ->
-          (fun fO fS n -> if n=0 then fO () else fS (n-1))
-            (fun _ -> (Pervasives.succ (Pervasives.succ
-            0)) :: (0 :: []))
-            (fun n3 ->
-            (fun fO fS n -> if n=0 then fO () else fS (n-1))
-              (fun _ -> (Pervasives.succ (Pervasives.succ
-              0)) :: ((Pervasives.succ 0) :: []))
-              (fun n4 ->
-              (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                (fun _ -> [])
-                (fun n5 ->
-                (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                  (fun _ -> (Pervasives.succ (Pervasives.succ
-                  0)) :: ((Pervasives.succ (Pervasives.succ (Pervasives.succ
-                  0))) :: []))
-                  (fun n6 ->
-                  (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                    (fun _ -> (Pervasives.succ (Pervasives.succ
-                    0)) :: ((Pervasives.succ (Pervasives.succ
-                    (Pervasives.succ (Pervasives.succ 0)))) :: []))
-                    (fun _ -> [])
-                    n6)
-                  n5)
-                n4)
-              n3)
-            n2)
-          (fun n3 ->
-          (fun fO fS n -> if n=0 then fO () else fS (n-1))
-            (fun _ ->
-            (fun fO fS n -> if n=0 then fO () else fS (n-1))
-              (fun _ -> (Pervasives.succ (Pervasives.succ (Pervasives.succ
-              0))) :: ((Pervasives.succ (Pervasives.succ
-              0)) :: (0 :: [])))
-              (fun n4 ->
-              (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                (fun _ -> (Pervasives.succ (Pervasives.succ (Pervasives.succ
-                0))) :: ((Pervasives.succ (Pervasives.succ
-                0)) :: ((Pervasives.succ 0) :: [])))
-                (fun n5 ->
-                (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                  (fun _ -> (Pervasives.succ (Pervasives.succ
-                  (Pervasives.succ 0))) :: ((Pervasives.succ (Pervasives.succ
-                  0)) :: []))
-                  (fun n6 ->
-                  (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                    (fun _ -> [])
-                    (fun n7 ->
-                    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                      (fun _ -> (Pervasives.succ (Pervasives.succ
-                      (Pervasives.succ 0))) :: ((Pervasives.succ
-                      (Pervasives.succ (Pervasives.succ (Pervasives.succ
-                      0)))) :: []))
-                      (fun _ -> [])
-                      n7)
-                    n6)
-                  n5)
-                n4)
-              n2)
-            (fun n4 ->
-            (fun fO fS n -> if n=0 then fO () else fS (n-1))
-              (fun _ ->
-              (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                (fun _ -> (Pervasives.succ (Pervasives.succ (Pervasives.succ
-                (Pervasives.succ 0)))) :: ((Pervasives.succ (Pervasives.succ
-                0)) :: (0 :: [])))
-                (fun n5 ->
-                (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                  (fun _ -> (Pervasives.succ (Pervasives.succ
-                  (Pervasives.succ (Pervasives.succ
-                  0)))) :: ((Pervasives.succ (Pervasives.succ
-                  0)) :: ((Pervasives.succ 0) :: [])))
-                  (fun n6 ->
-                  (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                    (fun _ -> (Pervasives.succ (Pervasives.succ
-                    (Pervasives.succ (Pervasives.succ
-                    0)))) :: ((Pervasives.succ (Pervasives.succ
-                    0)) :: []))
-                    (fun n7 ->
-                    (fun fO fS n -> if n=0 then fO () else fS (n-1))
-                      (fun _ -> (Pervasives.succ (Pervasives.succ
-                      (Pervasives.succ (Pervasives.succ
-                      0)))) :: ((Pervasives.succ (Pervasives.succ
-                      (Pervasives.succ 0))) :: []))
-                      (fun _ -> [])
-                      n7)
-                    n6)
-                  n5)
-                n2)
-              (fun _ -> [])
-              n4)
-            n3)
-          n0)
-        n)
-      n1
  end

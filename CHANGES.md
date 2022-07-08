@@ -1,3 +1,10 @@
+## 0.3.0 (2022-07-07)
+
+- Added support for a new mapping validation function (`check_swap_equivalence`).
+- Updated the interfaces of mapping-related functions.
+- Generally improved organization and documentation.
+- Moved benchmarking scripts to [VOQC-benchmarks](https://github.com/inQWIRE/VOQC-benchmarks).
+
 ## 0.2.1 (2021-06-21)
 
 - Updated to the most recent version of SQIR & extracted using Coq v8.13.2.

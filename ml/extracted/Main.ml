@@ -1,66 +1,63 @@
-open CXCancellation
 open ConnectivityGraph
 open GateCancellation
+open GreedyLayout
 open HadamardReduction
 open Layouts
+open List
+open MappingGateSet
+open MappingValidation
 open NotPropagation
 open Optimize1qGates
 open RotationMerging
-open SimpleMapping
+open SwapRoute
 open UnitaryListRepresentation
 
-type circ = StandardGateSet.standard_ucom_l
+type circ = FullGateSet.full_ucom_l
 
-type gate_counts =
-| BuildCounts of int * int * int * int * int * int * int * int * int * 
-   int * int * int * int * int * int * int * int * int * int * int * 
-   int
+type layout = Layouts.layout
 
-type layout = qmap
+type c_graph = int * (int -> int -> bool)
 
-type c_graph = (int * (int -> int -> int list)) * (int -> int -> bool)
+(** val graph_dim : c_graph -> int **)
 
-(** val get_dim : c_graph -> int **)
+let graph_dim =
+  fst
 
-let get_dim cg =
-  fst (fst cg)
+(** val is_in_graph : c_graph -> int -> int -> bool **)
 
-(** val get_get_path : c_graph -> int -> int -> int list **)
-
-let get_get_path cg =
-  snd (fst cg)
-
-(** val get_is_in_graph : c_graph -> int -> int -> bool **)
-
-let get_is_in_graph =
+let is_in_graph =
   snd
+
+type path_finding_fun = int -> int -> int list
+
+type qubit_ordering_fun = int option -> int list
 
 (** val check_well_typed : circ -> int -> bool **)
 
 let check_well_typed c n =
   uc_well_typed_l_b n ((fun x _ -> x) c n)
 
-(** val convert_to_ibm : circ -> StandardGateSet.standard_ucom_l **)
+(** val convert_to_ibm : circ -> FullGateSet.full_ucom_l **)
 
 let convert_to_ibm =
-  StandardGateSet.convert_to_ibm
+  FullGateSet.convert_to_ibm
 
-(** val convert_to_rzq : circ -> StandardGateSet.standard_ucom_l **)
+(** val convert_to_rzq : circ -> FullGateSet.full_ucom_l **)
 
 let convert_to_rzq =
-  StandardGateSet.convert_to_rzq
+  FullGateSet.convert_to_rzq
 
 (** val replace_rzq :
-    circ -> StandardGateSet.StandardGateSet.coq_Std_Unitary gate_list **)
+    circ -> FullGateSet.FullGateSet.coq_Full_Unitary gate_list **)
 
 let replace_rzq =
-  StandardGateSet.replace_rzq
+  FullGateSet.replace_rzq
 
 (** val decompose_to_cnot :
-    circ -> StandardGateSet.StandardGateSet.coq_Std_Unitary gate_list **)
+    circ -> FullGateSet.FullGateSet.coq_Full_Unitary gate_list **)
 
 let decompose_to_cnot =
-  StandardGateSet.decompose_to_cnot
+  FullGateSet.decompose_to_cnot
 
 (** val count_I : circ -> int **)
 
@@ -70,7 +67,7 @@ let count_I l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_I -> true
+         | FullGateSet.FullGateSet.U_I -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -82,7 +79,7 @@ let count_X l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_X -> true
+         | FullGateSet.FullGateSet.U_X -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -94,7 +91,7 @@ let count_Y l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Y -> true
+         | FullGateSet.FullGateSet.U_Y -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -106,7 +103,7 @@ let count_Z l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Z -> true
+         | FullGateSet.FullGateSet.U_Z -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -118,7 +115,7 @@ let count_H l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_H -> true
+         | FullGateSet.FullGateSet.U_H -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -130,7 +127,7 @@ let count_S l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_S -> true
+         | FullGateSet.FullGateSet.U_S -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -142,7 +139,7 @@ let count_T l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_T -> true
+         | FullGateSet.FullGateSet.U_T -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -154,7 +151,7 @@ let count_Sdg l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Sdg -> true
+         | FullGateSet.FullGateSet.U_Sdg -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -166,7 +163,7 @@ let count_Tdg l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Tdg -> true
+         | FullGateSet.FullGateSet.U_Tdg -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -178,7 +175,7 @@ let count_Rx l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Rx _ -> true
+         | FullGateSet.FullGateSet.U_Rx _ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -190,7 +187,7 @@ let count_Ry l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Ry _ -> true
+         | FullGateSet.FullGateSet.U_Ry _ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -202,7 +199,7 @@ let count_Rz l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Rz _ -> true
+         | FullGateSet.FullGateSet.U_Rz _ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -214,7 +211,7 @@ let count_Rzq l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_Rzq _ -> true
+         | FullGateSet.FullGateSet.U_Rzq _ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -226,7 +223,7 @@ let count_U1 l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_U1 _ -> true
+         | FullGateSet.FullGateSet.U_U1 _ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -238,7 +235,7 @@ let count_U2 l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_U2 (_, _) -> true
+         | FullGateSet.FullGateSet.U_U2 (_, _) -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -250,7 +247,7 @@ let count_U3 l =
       match g with
       | App1 (y, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_U3 (_, _, _) -> true
+         | FullGateSet.FullGateSet.U_U3 (_, _, _) -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -262,7 +259,7 @@ let count_CX l =
       match g with
       | App2 (y, _, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_CX -> true
+         | FullGateSet.FullGateSet.U_CX -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -274,7 +271,7 @@ let count_CZ l =
       match g with
       | App2 (y, _, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_CZ -> true
+         | FullGateSet.FullGateSet.U_CZ -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -286,7 +283,7 @@ let count_SWAP l =
       match g with
       | App2 (y, _, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_SWAP -> true
+         | FullGateSet.FullGateSet.U_SWAP -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -298,7 +295,7 @@ let count_CCX l =
       match g with
       | App3 (y, _, _, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_CCX -> true
+         | FullGateSet.FullGateSet.U_CCX -> true
          | _ -> false)
       | _ -> false) l)
 
@@ -310,32 +307,48 @@ let count_CCZ l =
       match g with
       | App3 (y, _, _, _) ->
         (match y with
-         | StandardGateSet.StandardGateSet.U_CCZ -> true
+         | FullGateSet.FullGateSet.U_CCZ -> true
          | _ -> false)
       | _ -> false) l)
 
-(** val count_gates : circ -> gate_counts **)
+(** val count_1q : circ -> int **)
 
-let count_gates l =
-  BuildCounts ((count_I l), (count_X l), (count_Y l), (count_Z l),
-    (count_H l), (count_S l), (count_T l), (count_Sdg l), (count_Tdg l),
-    (count_Rx l), (count_Ry l), (count_Rz l), (count_Rzq l), (count_U1 l),
-    (count_U2 l), (count_U3 l), (count_CX l), (count_CZ l), (count_SWAP l),
-    (count_CCX l), (count_CCZ l))
+let count_1q l =
+  List.length
+    (List.filter (fun g -> match g with
+                           | App1 (_, _) -> true
+                           | _ -> false) l)
 
-(** val total_gate_count : circ -> int **)
+(** val count_2q : circ -> int **)
 
-let total_gate_count =
+let count_2q l =
+  List.length
+    (List.filter (fun g -> match g with
+                           | App2 (_, _, _) -> true
+                           | _ -> false) l)
+
+(** val count_3q : circ -> int **)
+
+let count_3q l =
+  List.length
+    (List.filter (fun g ->
+      match g with
+      | App3 (_, _, _, _) -> true
+      | _ -> false) l)
+
+(** val count_total : circ -> int **)
+
+let count_total =
   List.length
 
-(** val count_clifford_rzq : circ -> int **)
+(** val count_rzq_clifford : circ -> int **)
 
-let count_clifford_rzq l =
+let count_rzq_clifford l =
   let f = fun g ->
     match g with
     | App1 (y, _) ->
       (match y with
-       | StandardGateSet.StandardGateSet.U_Rzq q ->
+       | FullGateSet.FullGateSet.U_Rzq q ->
          let q' = RzQGateSet.bound q in
          (||)
            ((||)
@@ -346,97 +359,42 @@ let count_clifford_rzq l =
   in
   List.length (List.filter f l)
 
-(** val scale_count : gate_counts -> int -> gate_counts **)
-
-let scale_count gc n0 =
-  let BuildCounts (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s,
-                   t, u) = gc
-  in
-  BuildCounts ((( * ) n0 a), (( * ) n0 b), (( * ) n0 c), (( * ) n0 d),
-  (( * ) n0 e), (( * ) n0 f), (( * ) n0 g), (( * ) n0 h), (( * ) n0 i),
-  (( * ) n0 j), (( * ) n0 k), (( * ) n0 l), (( * ) n0 m), (( * ) n0 n),
-  (( * ) n0 o), (( * ) n0 p), (( * ) n0 q), (( * ) n0 r), (( * ) n0 s),
-  (( * ) n0 t), (( * ) n0 u))
-
-(** val add_counts : gate_counts -> gate_counts -> gate_counts **)
-
-let add_counts gc gc' =
-  let BuildCounts (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s,
-                   t, u) = gc
-  in
-  let BuildCounts (a', b', c', d', e', f', g', h', i', j', k', l', m', n',
-                   o', p', q', r', s', t', u') = gc'
-  in
-  BuildCounts (((+) a a'), ((+) b b'), ((+) c c'), ((+) d d'), ((+) e e'),
-  ((+) f f'), ((+) g g'), ((+) h h'), ((+) i i'), ((+) j j'), ((+) k k'),
-  ((+) l l'), ((+) m m'), ((+) n n'), ((+) o o'), ((+) p p'), ((+) q q'),
-  ((+) r r'), ((+) s s'), ((+) t t'), ((+) u u'))
-
-(** val count_gates_lcr : ((circ * circ) * circ) -> int -> gate_counts **)
-
-let count_gates_lcr lcr n =
-  let (lc, r) = lcr in
-  let (l, c) = lc in
-  let ln = count_gates l in
-  let cn = count_gates c in
-  let rn = count_gates r in
-  add_counts
-    (add_counts ln
-      (scale_count cn ((-) n (Pervasives.succ (Pervasives.succ 0))))) rn
-
-(** val optimize_1q_gates : circ -> circ **)
-
-let optimize_1q_gates c =
-  StandardGateSet.coq_IBM_to_standard
-    (optimize_1q_gates (StandardGateSet.standard_to_IBM c))
-
-(** val cx_cancellation : circ -> circ **)
-
-let cx_cancellation c =
-  StandardGateSet.coq_IBM_to_standard
-    (cx_cancellation (StandardGateSet.standard_to_IBM c))
-
 (** val optimize_ibm : circ -> circ **)
 
 let optimize_ibm c =
-  StandardGateSet.coq_IBM_to_standard
-    (CXCancellation.cx_cancellation
-      (Optimize1qGates.optimize_1q_gates (StandardGateSet.standard_to_IBM c)))
+  FullGateSet.coq_IBM_to_full (optimize_1q_gates (FullGateSet.full_to_IBM c))
 
 (** val not_propagation : circ -> circ **)
 
 let not_propagation c =
-  StandardGateSet.coq_RzQ_to_standard
-    (not_propagation (StandardGateSet.standard_to_RzQ c))
+  FullGateSet.coq_RzQ_to_full (not_propagation (FullGateSet.full_to_RzQ c))
 
 (** val hadamard_reduction : circ -> circ **)
 
 let hadamard_reduction c =
-  StandardGateSet.coq_RzQ_to_standard
-    (hadamard_reduction (StandardGateSet.standard_to_RzQ c))
+  FullGateSet.coq_RzQ_to_full (hadamard_reduction (FullGateSet.full_to_RzQ c))
 
 (** val cancel_single_qubit_gates : circ -> circ **)
 
 let cancel_single_qubit_gates c =
-  StandardGateSet.coq_RzQ_to_standard
-    (cancel_single_qubit_gates (StandardGateSet.standard_to_RzQ c))
+  FullGateSet.coq_RzQ_to_full
+    (cancel_single_qubit_gates (FullGateSet.full_to_RzQ c))
 
 (** val cancel_two_qubit_gates : circ -> circ **)
 
 let cancel_two_qubit_gates c =
-  StandardGateSet.coq_RzQ_to_standard
-    (cancel_two_qubit_gates (StandardGateSet.standard_to_RzQ c))
+  FullGateSet.coq_RzQ_to_full
+    (cancel_two_qubit_gates (FullGateSet.full_to_RzQ c))
 
 (** val merge_rotations : circ -> circ **)
 
 let merge_rotations c =
-  StandardGateSet.coq_RzQ_to_standard
-    (merge_rotations (StandardGateSet.standard_to_RzQ c))
+  FullGateSet.coq_RzQ_to_full (merge_rotations (FullGateSet.full_to_RzQ c))
 
 (** val optimize_nam : circ -> circ **)
 
 let optimize_nam c =
-  StandardGateSet.coq_RzQ_to_standard
+  FullGateSet.coq_RzQ_to_full
     (GateCancellation.cancel_single_qubit_gates
       (GateCancellation.cancel_two_qubit_gates
         (RotationMerging.merge_rotations
@@ -447,87 +405,174 @@ let optimize_nam c =
                   (GateCancellation.cancel_two_qubit_gates
                     (HadamardReduction.hadamard_reduction
                       (NotPropagation.not_propagation
-                        (StandardGateSet.standard_to_RzQ c)))))))))))
+                        (FullGateSet.full_to_RzQ c)))))))))))
 
 (** val optimize_nam_light : circ -> circ **)
 
 let optimize_nam_light c =
-  StandardGateSet.coq_RzQ_to_standard
+  FullGateSet.coq_RzQ_to_full
     (GateCancellation.cancel_single_qubit_gates
       (HadamardReduction.hadamard_reduction
         (GateCancellation.cancel_two_qubit_gates
           (GateCancellation.cancel_single_qubit_gates
             (GateCancellation.cancel_two_qubit_gates
               (HadamardReduction.hadamard_reduction
-                (NotPropagation.not_propagation
-                  (StandardGateSet.standard_to_RzQ c))))))))
+                (NotPropagation.not_propagation (FullGateSet.full_to_RzQ c))))))))
 
 (** val optimize_nam_lcr : circ -> ((circ * circ) * circ) option **)
 
 let optimize_nam_lcr c =
-  coq_LCR c optimize_nam StandardGateSet.StandardGateSet.match_gate
+  coq_LCR c optimize_nam FullGateSet.FullGateSet.match_gate
 
-(** val check_layout : layout -> int -> bool **)
+(** val optimize : circ -> circ **)
 
-let check_layout la n =
-  layout_well_formed_b n ((fun x _ -> x) la n)
+let optimize c =
+  optimize_ibm (optimize_nam c)
 
-(** val check_graph : c_graph -> bool **)
+(** val swap_route :
+    circ -> layout -> c_graph -> path_finding_fun -> FullGateSet.full_ucom_l **)
 
-let check_graph cg =
-  let n = get_dim cg in
-  let get_path0 = get_get_path cg in
-  let is_in_graph0 = get_is_in_graph cg in
-  check_graph n get_path0 is_in_graph0
+let swap_route c lay cg get_path0 =
+  let n = graph_dim cg in
+  let (c0, _) =
+    swap_route (FullGateSet.full_to_map ((fun x _ -> x) c n)) lay get_path0
+  in
+  FullGateSet.map_to_full c0
 
-(** val check_constraints : circ -> c_graph -> bool **)
+(** val decompose_swaps : circ -> c_graph -> FullGateSet.full_ucom_l **)
 
-let check_constraints c cg =
-  let n = get_dim cg in
-  let is_in_graph0 = get_is_in_graph cg in
-  respects_constraints_directed_b is_in_graph0 ((fun x _ -> x) c n)
-
-(** val simple_map :
-    circ -> layout -> c_graph -> StandardGateSet.standard_ucom_l * qmap **)
-
-let simple_map c la cg =
-  let n = get_dim cg in
-  let get_path0 = get_get_path cg in
-  let is_in_graph0 = get_is_in_graph cg in
-  simple_map ((fun x _ -> x) c n) ((fun x _ -> x) la n) get_path0 is_in_graph0
-
-(** val make_tenerife : unit -> c_graph **)
-
-let make_tenerife _ =
-  (((Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
-    (Pervasives.succ 0))))), Tenerife.get_path), Tenerife.is_in_graph)
-
-(** val make_lnn : int -> c_graph **)
-
-let make_lnn n =
-  ((n, LNN.get_path), (LNN.is_in_graph n))
-
-(** val make_lnn_ring : int -> c_graph **)
-
-let make_lnn_ring n =
-  ((n, (LNNRing.get_path n)), (LNNRing.is_in_graph n))
-
-(** val make_grid : int -> int -> c_graph **)
-
-let make_grid m n =
-  (((( * ) m n), (Grid.get_path n)), (Grid.is_in_graph m n))
+let decompose_swaps c cg =
+  FullGateSet.map_to_full
+    (decompose_swaps_and_cnots (FullGateSet.full_to_map c) (is_in_graph cg))
 
 (** val trivial_layout : int -> layout **)
 
 let trivial_layout =
   trivial_layout
 
-(** val list_to_layout : int list -> layout **)
+(** val check_list : int list -> bool **)
+
+let check_list =
+  check_list
+
+(** val list_to_layout : Layouts.FMap.key list -> layout **)
 
 let list_to_layout =
   list_to_layout
 
 (** val layout_to_list : layout -> int -> int list **)
 
-let layout_to_list la n =
-  layout_to_list n ((fun x _ -> x) la n)
+let layout_to_list lay n =
+  map (fun ox -> match ox with
+                 | Some x -> x
+                 | None -> 0) (layout_to_list n lay)
+
+(** val greedy_layout :
+    circ -> c_graph -> (int option -> int list) -> layout **)
+
+let greedy_layout c cg q_ordering0 =
+  let n = graph_dim cg in
+  greedy_layout (FullGateSet.full_to_map ((fun x _ -> x) c n)) n q_ordering0
+
+(** val beq_tup : (int * int) -> (int * int) -> bool **)
+
+let beq_tup t t' =
+  let (n1, n2) = t in let (n1', n2') = t' in (&&) ((=) n1 n1') ((=) n2 n2')
+
+(** val make_lnn : int -> c_graph **)
+
+let make_lnn n =
+  (n, (LNN.is_in_graph n))
+
+(** val make_lnn_ring : int -> c_graph **)
+
+let make_lnn_ring n =
+  (n, (LNNRing.is_in_graph n))
+
+(** val make_grid : int -> int -> c_graph **)
+
+let make_grid m n =
+  ((( * ) m n), (Grid.is_in_graph m n))
+
+(** val c_graph_from_coupling_map : int -> (int * int) list -> c_graph **)
+
+let c_graph_from_coupling_map n cmap =
+  (n, (fun n1 n2 -> List.exists (beq_tup (n1, n2)) cmap))
+
+(** val lnn_path_finding_fun : int -> path_finding_fun **)
+
+let lnn_path_finding_fun _ =
+  LNN.get_path
+
+(** val lnn_ring_path_finding_fun : int -> path_finding_fun **)
+
+let lnn_ring_path_finding_fun =
+  LNNRing.get_path
+
+(** val grid_path_finding_fun : int -> int -> path_finding_fun **)
+
+let grid_path_finding_fun _ =
+  Grid.get_path
+
+(** val lnn_qubit_ordering_fun : int -> qubit_ordering_fun **)
+
+let lnn_qubit_ordering_fun =
+  LNN.q_ordering
+
+(** val lnn_ring_qubit_ordering_fun : int -> qubit_ordering_fun **)
+
+let lnn_ring_qubit_ordering_fun =
+  LNNRing.q_ordering
+
+(** val remove_swaps : circ -> layout -> FullGateSet.full_ucom_l **)
+
+let remove_swaps c lay =
+  let (c0, _) = remove_swaps (FullGateSet.full_to_map c) lay in
+  FullGateSet.map_to_full c0
+
+(** val check_swap_equivalence : circ -> circ -> layout -> layout -> bool **)
+
+let check_swap_equivalence c1 c2 lay1 lay2 =
+  is_swap_equivalent (FullGateSet.full_to_map c1)
+    (FullGateSet.full_to_map c2) lay1 lay2 (fun n ->
+    match_gate n (FullGateSet.FullGateSet.match_gate (Pervasives.succ 0)))
+
+(** val check_constraints : circ -> c_graph -> bool **)
+
+let check_constraints c cg =
+  check_constraints (FullGateSet.full_to_map c) (is_in_graph cg)
+
+(** val optimize_and_map_to_lnn_ring_16 : circ -> circ option **)
+
+let optimize_and_map_to_lnn_ring_16 c =
+  let cg =
+    make_lnn_ring (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ 0))))))))))))))))
+  in
+  let get_path0 =
+    lnn_ring_path_finding_fun (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ 0))))))))))))))))
+  in
+  let q_ordering0 =
+    lnn_ring_qubit_ordering_fun (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ 0))))))))))))))))
+  in
+  if check_well_typed c (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ 0))))))))))))))))
+  then let c1 = optimize_nam c in
+       let lay = greedy_layout c cg q_ordering0 in
+       let c2 = swap_route c1 lay cg get_path0 in
+       let c3 = decompose_swaps c2 cg in Some (optimize c3)
+  else None

@@ -1,18 +1,18 @@
 open OpenQASM
 open OpenQASM.AST
 open Printf
-open StandardGateSet
+open FullGateSet.FullGateSet
 open UnitaryListRepresentation
 
 module StringMap = Map.Make(String)
 
-(* Code for converting between OpenQASM and SQIR circuits uing the standard gate set. *)
+(* Code for converting between OpenQASM and SQIR circuits uing the full gate set. *)
 
 (** List of recognized gates **)
 
 let qelib1 = [
 
-  (* standard gates *)
+  (* full gates *)
   ("u3",  TGate(3,1));
   ("u2",  TGate(2,1));
   ("u1",  TGate(1,1));
@@ -183,27 +183,27 @@ let get_gate_list f qasm_to_sqir_gate =
       (QbitMap.empty, 0) qbit_list in
   (translate_program ast qbit_map sym_tab qasm_to_sqir_gate, n)
 
-let ig q = App1 (StandardGateSet.U_I, q)
-let x q = App1 (StandardGateSet.U_X, q)
-let y q = App1 (StandardGateSet.U_Y, q)
-let z q = App1 (StandardGateSet.U_Z, q)
-let h q = App1 (StandardGateSet.U_H, q)
-let s q = App1 (StandardGateSet.U_S, q)
-let t q = App1 (StandardGateSet.U_T, q)
-let sdg q = App1 (StandardGateSet.U_Sdg, q)
-let tdg q = App1 (StandardGateSet.U_Tdg, q)
-let rx r q = App1 (StandardGateSet.U_Rx(r), q)
-let ry r q = App1 (StandardGateSet.U_Ry(r), q)
-let rz r q = App1 (StandardGateSet.U_Rz(r), q)
-let rzq r q = App1 (StandardGateSet.U_Rzq(r), q)
-let u1 r1 q = App1 (StandardGateSet.U_U1(r1), q)
-let u2 r1 r2 q = App1 (StandardGateSet.U_U2(r1,r2), q)
-let u3 r1 r2 r3 q = App1 (StandardGateSet.U_U3(r1,r2,r3), q)
-let cx q1 q2 = App2 (StandardGateSet.U_CX, q1, q2)
-let cz q1 q2 = App2 (StandardGateSet.U_CZ, q1, q2)
-let swap q1 q2 = App2 (StandardGateSet.U_SWAP, q1, q2)
-let ccx q1 q2 q3 = App3 (StandardGateSet.U_CCX, q1, q2, q3)
-let ccz q1 q2 q3= App3 (StandardGateSet.U_CCZ, q1, q2, q3)
+let ig q = App1 (U_I, q)
+let x q = App1 (U_X, q)
+let y q = App1 (U_Y, q)
+let z q = App1 (U_Z, q)
+let h q = App1 (U_H, q)
+let s q = App1 (U_S, q)
+let t q = App1 (U_T, q)
+let sdg q = App1 (U_Sdg, q)
+let tdg q = App1 (U_Tdg, q)
+let rx r q = App1 (U_Rx(r), q)
+let ry r q = App1 (U_Ry(r), q)
+let rz r q = App1 (U_Rz(r), q)
+let rzq r q = App1 (U_Rzq(r), q)
+let u1 r1 q = App1 (U_U1(r1), q)
+let u2 r1 r2 q = App1 (U_U2(r1,r2), q)
+let u3 r1 r2 r3 q = App1 (U_U3(r1,r2,r3), q)
+let cx q1 q2 = App2 (U_CX, q1, q2)
+let cz q1 q2 = App2 (U_CZ, q1, q2)
+let swap q1 q2 = App2 (U_SWAP, q1, q2)
+let ccx q1 q2 q3 = App3 (U_CCX, q1, q2, q3)
+let ccz q1 q2 q3= App3 (U_CCZ, q1, q2, q3)
 
 let qasm_to_sqir_gate uop qmap sym_tab =
 match uop with
@@ -264,28 +264,28 @@ let write_qasm_file fname p dim sqir_to_qasm_gate =
    
 let sqir_to_qasm_gate oc g =
    match g with
-   | App1 (StandardGateSet.U_I, n) -> fprintf oc "id q[%d];\n" n
-   | App1 (StandardGateSet.U_X, n) -> fprintf oc "x q[%d];\n" n
-   | App1 (StandardGateSet.U_Y, n) -> fprintf oc "y q[%d];\n" n
-   | App1 (StandardGateSet.U_Z, n) -> fprintf oc "z q[%d];\n" n
-   | App1 (StandardGateSet.U_H, n) -> fprintf oc "h q[%d];\n" n
-   | App1 (StandardGateSet.U_S, n) -> fprintf oc "s q[%d];\n" n
-   | App1 (StandardGateSet.U_T, n) -> fprintf oc "t q[%d];\n" n
-   | App1 (StandardGateSet.U_Sdg, n) -> fprintf oc "sdg q[%d];\n" n
-   | App1 (StandardGateSet.U_Tdg, n) -> fprintf oc "tdg q[%d];\n" n
-   | App1 (StandardGateSet.U_Rx(r), n) -> fprintf oc "rx(%f) q[%d];\n" r n
-   | App1 (StandardGateSet.U_Ry(r), n) -> fprintf oc "ry(%f) q[%d];\n" r n
-   | App1 (StandardGateSet.U_Rz(r), n) -> fprintf oc "rz(%f) q[%d];\n" r n
-   | App1 (StandardGateSet.U_Rzq(q), n) -> 
+   | App1 (U_I, n) -> fprintf oc "id q[%d];\n" n
+   | App1 (U_X, n) -> fprintf oc "x q[%d];\n" n
+   | App1 (U_Y, n) -> fprintf oc "y q[%d];\n" n
+   | App1 (U_Z, n) -> fprintf oc "z q[%d];\n" n
+   | App1 (U_H, n) -> fprintf oc "h q[%d];\n" n
+   | App1 (U_S, n) -> fprintf oc "s q[%d];\n" n
+   | App1 (U_T, n) -> fprintf oc "t q[%d];\n" n
+   | App1 (U_Sdg, n) -> fprintf oc "sdg q[%d];\n" n
+   | App1 (U_Tdg, n) -> fprintf oc "tdg q[%d];\n" n
+   | App1 (U_Rx(r), n) -> fprintf oc "rx(%f) q[%d];\n" r n
+   | App1 (U_Ry(r), n) -> fprintf oc "ry(%f) q[%d];\n" r n
+   | App1 (U_Rz(r), n) -> fprintf oc "rz(%f) q[%d];\n" r n
+   | App1 (U_Rzq(q), n) -> 
        fprintf oc "rzq(%a,%a) q[%d];\n" Z.output (Q.num q) Z.output (Q.den q) n
-   | App1 (StandardGateSet.U_U1(r1), n) -> fprintf oc "u1(%f) q[%d];\n" r1 n
-   | App1 (StandardGateSet.U_U2(r1,r2), n) -> fprintf oc "u2(%f,%f) q[%d];\n" r1 r2 n
-   | App1 (StandardGateSet.U_U3(r1,r2,r3), n) -> fprintf oc "u3(%f,%f,%f) q[%d];\n" r1 r2 r3 n
-   | App2 (StandardGateSet.U_CX, m, n) -> fprintf oc "cx q[%d], q[%d];\n" m n
-   | App2 (StandardGateSet.U_CZ, m, n) -> fprintf oc "cz q[%d], q[%d];\n" m n
-   | App2 (StandardGateSet.U_SWAP, m, n) -> fprintf oc "swap q[%d], q[%d];\n" m n
-   | App3 (StandardGateSet.U_CCX, m, n, p) -> fprintf oc "ccx q[%d], q[%d], q[%d];\n" m n p
-   | App3 (StandardGateSet.U_CCZ, m, n, p) -> fprintf oc "ccz q[%d], q[%d], q[%d];\n" m n p
+   | App1 (U_U1(r1), n) -> fprintf oc "u1(%f) q[%d];\n" r1 n
+   | App1 (U_U2(r1,r2), n) -> fprintf oc "u2(%f,%f) q[%d];\n" r1 r2 n
+   | App1 (U_U3(r1,r2,r3), n) -> fprintf oc "u3(%f,%f,%f) q[%d];\n" r1 r2 r3 n
+   | App2 (U_CX, m, n) -> fprintf oc "cx q[%d], q[%d];\n" m n
+   | App2 (U_CZ, m, n) -> fprintf oc "cz q[%d], q[%d];\n" m n
+   | App2 (U_SWAP, m, n) -> fprintf oc "swap q[%d], q[%d];\n" m n
+   | App3 (U_CCX, m, n, p) -> fprintf oc "ccx q[%d], q[%d], q[%d];\n" m n p
+   | App3 (U_CCZ, m, n, p) -> fprintf oc "ccz q[%d], q[%d], q[%d];\n" m n p
    (* badly typed case (e.g. App2 of H) -- should be unreachable *)
    | _ -> raise (Failure ("ERROR: Failed to write qasm file; unexpected gate in sqir_to_qasm_gate"))
 

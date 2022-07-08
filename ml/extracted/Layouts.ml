@@ -1,81 +1,98 @@
+open FMapAVL
+open OrderedTypeEx
 open PeanoNat
 
-type qmap = (int -> int) * (int -> int)
+type __ = Obj.t
 
-(** val log2phys : qmap -> int -> int **)
+module FMap = Make(Nat_as_OT)
 
-let log2phys m q =
-  let (m0, _) = m in m0 q
+type layout = int FMap.t * int FMap.t
 
-(** val phys2log : qmap -> int -> int **)
+(** val empty : layout **)
 
-let phys2log m q =
-  let (_, m0) = m in m0 q
+let empty =
+  (FMap.empty, FMap.empty)
 
-(** val swap_in_map : qmap -> int -> int -> qmap **)
+(** val find_phys : layout -> FMap.key -> int option **)
 
-let swap_in_map m phys1 phys2 =
-  let (m1, m2) = m in
-  let log1 = m2 phys1 in
-  let log2 = m2 phys2 in
-  let m1' = fun q ->
-    if (=) q log1 then phys2 else if (=) q log2 then phys1 else m1 q
-  in
-  let m2' = fun q ->
-    if (=) q phys1 then log2 else if (=) q phys2 then log1 else m2 q
-  in
-  (m1', m2')
+let find_phys lay l =
+  FMap.find l (fst lay)
 
-(** val layout_well_formed_b' : int -> int -> qmap -> bool **)
+(** val get_phys : layout -> FMap.key -> int **)
 
-let rec layout_well_formed_b' dim n m =
+let get_phys lay l =
+  match find_phys lay l with
+  | Some p -> p
+  | None -> 0
+
+(** val find_log : layout -> FMap.key -> int option **)
+
+let find_log lay p =
+  FMap.find p (snd lay)
+
+(** val get_log : layout -> FMap.key -> int **)
+
+let get_log lay p =
+  match find_log lay p with
+  | Some l -> l
+  | None -> 0
+
+(** val add : layout -> FMap.key -> int -> layout **)
+
+let add lay l p =
+  ((FMap.add l p (fst lay)), (FMap.add p l (snd lay)))
+
+(** val swap_log : layout -> FMap.key -> FMap.key -> layout **)
+
+let swap_log lay p1 p2 =
+  match find_log lay p1 with
+  | Some l1 ->
+    (match find_log lay p2 with
+     | Some l2 -> add (add lay l1 p2) l2 p1
+     | None -> lay)
+  | None -> lay
+
+(** val trivial_layout : int -> layout **)
+
+let rec trivial_layout n =
   (fun fO fS n -> if n=0 then fO () else fS (n-1))
-    (fun _ -> true)
-    (fun n' ->
-    (&&)
-      ((&&)
-        ((&&)
-          ((&&) (Nat.ltb (log2phys m n') dim) (Nat.ltb (phys2log m n') dim))
-          ((=) (phys2log m (log2phys m n')) n'))
-        ((=) (log2phys m (phys2log m n')) n'))
-      (layout_well_formed_b' dim n' m))
+    (fun _ -> empty)
+    (fun n' -> add (trivial_layout n') n' n')
     n
 
-(** val layout_well_formed_b : int -> qmap -> bool **)
+(** val layout_to_list' : int -> layout -> int option list **)
 
-let layout_well_formed_b dim m =
-  layout_well_formed_b' dim dim m
-
-(** val layout_to_list' : int -> int -> qmap -> int list **)
-
-let rec layout_to_list' dim x m =
+let rec layout_to_list' x m =
   (fun fO fS n -> if n=0 then fO () else fS (n-1))
     (fun _ -> [])
-    (fun x' ->
-    List.append (layout_to_list' dim x' m) ((phys2log m x') :: []))
+    (fun x' -> List.append (layout_to_list' x' m) ((find_log m x') :: []))
     x
 
-(** val layout_to_list : int -> qmap -> int list **)
+(** val layout_to_list : int -> layout -> int option list **)
 
-let layout_to_list dim m =
-  layout_to_list' dim dim m
+let layout_to_list =
+  layout_to_list'
 
-(** val list_to_layout' : int -> int list -> int -> qmap **)
+(** val list_to_layout' : FMap.key list -> int -> layout **)
 
-let rec list_to_layout' dim l acc =
+let rec list_to_layout' l acc =
   match l with
-  | [] -> ((fun x -> x), (fun x -> x))
-  | h :: t ->
-    let m' = list_to_layout' dim t (Pervasives.succ acc) in
-    ((fun x -> if (=) x h then acc else fst m' x), (fun x ->
-    if (=) x acc then h else snd m' x))
+  | [] -> empty
+  | h :: t0 ->
+    let m' = list_to_layout' t0 (Pervasives.succ acc) in add m' h acc
 
-(** val list_to_layout : int list -> qmap **)
+(** val list_to_layout : FMap.key list -> layout **)
 
 let list_to_layout l =
-  list_to_layout' (List.length l) l 0
+  list_to_layout' l 0
 
-(** val trivial_layout : int -> qmap **)
+(** val nodup : int list -> bool **)
 
-let trivial_layout _ =
-  ((fun x -> x), (fun x -> x))
+let rec nodup = function
+| [] -> true
+| x :: xs -> if List.exists (fun y -> (=) y x) xs then false else nodup xs
+
+(** val check_list : int list -> bool **)
+
+let check_list l =
+  (&&) (List.for_all (fun x -> Nat.ltb x (List.length l)) l) (nodup l)

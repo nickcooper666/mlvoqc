@@ -4,8 +4,8 @@ install:
 uninstall:
 	dune uninstall
 
-voqc-cli:
-	dune build voqc_cli.exe
+example:
+	dune build example.exe
 
 doc:
 	dune build @doc

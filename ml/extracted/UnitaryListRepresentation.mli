@@ -48,6 +48,9 @@ val remove_suffix :
   'a1 gate_list -> 'a1 gate_list -> (int -> 'a1 -> 'a1 -> bool) -> 'a1
   gate_app list option
 
+val equalb :
+  'a1 gate_list -> 'a1 gate_list -> (int -> 'a1 -> 'a1 -> bool) -> bool
+
 val replace_pattern :
   'a1 gate_list -> 'a1 gate_list -> 'a1 gate_list -> (int -> 'a1 -> 'a1 ->
   bool) -> 'a1 gate_list option

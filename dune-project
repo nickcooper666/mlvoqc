@@ -16,4 +16,4 @@
  (depends
   (ocaml (>= 4.08))
   openQASM
-  zarith))
+  zarith (>= 1.5)))

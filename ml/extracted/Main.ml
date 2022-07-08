@@ -28,6 +28,10 @@ let graph_dim =
 let is_in_graph =
   snd
 
+type path_finding_fun = int -> int -> int list
+
+type qubit_ordering_fun = int option -> int list
+
 (** val check_well_typed : circ -> int -> bool **)
 
 let check_well_typed c n =
@@ -426,13 +430,12 @@ let optimize c =
   optimize_ibm (optimize_nam c)
 
 (** val swap_route :
-    circ -> layout -> c_graph -> (int -> int -> int list) ->
-    FullGateSet.full_ucom_l **)
+    circ -> layout -> c_graph -> path_finding_fun -> FullGateSet.full_ucom_l **)
 
-let swap_route c lay cg get_path =
+let swap_route c lay cg get_path0 =
   let n = graph_dim cg in
   let (c0, _) =
-    swap_route (FullGateSet.full_to_map ((fun x _ -> x) c n)) lay get_path
+    swap_route (FullGateSet.full_to_map ((fun x _ -> x) c n)) lay get_path0
   in
   FullGateSet.map_to_full c0
 
@@ -467,23 +470,59 @@ let layout_to_list lay n =
 (** val greedy_layout :
     circ -> c_graph -> (int option -> int list) -> layout **)
 
-let greedy_layout c cg q_ordering =
-  greedy_layout (FullGateSet.full_to_map c) (graph_dim cg) q_ordering
+let greedy_layout c cg q_ordering0 =
+  let n = graph_dim cg in
+  greedy_layout (FullGateSet.full_to_map ((fun x _ -> x) c n)) n q_ordering0
 
 (** val beq_tup : (int * int) -> (int * int) -> bool **)
 
 let beq_tup t t' =
   let (n1, n2) = t in let (n1', n2') = t' in (&&) ((=) n1 n1') ((=) n2 n2')
 
+(** val make_lnn : int -> c_graph **)
+
+let make_lnn n =
+  (n, (LNN.is_in_graph n))
+
+(** val make_lnn_ring : int -> c_graph **)
+
+let make_lnn_ring n =
+  (n, (LNNRing.is_in_graph n))
+
+(** val make_grid : int -> int -> c_graph **)
+
+let make_grid m n =
+  ((( * ) m n), (Grid.is_in_graph m n))
+
 (** val c_graph_from_coupling_map : int -> (int * int) list -> c_graph **)
 
 let c_graph_from_coupling_map n cmap =
   (n, (fun n1 n2 -> List.exists (beq_tup (n1, n2)) cmap))
 
-(** val make_lnn : int -> c_graph **)
+(** val lnn_path_finding_fun : int -> path_finding_fun **)
 
-let make_lnn n =
-  (n, (LNN.is_in_graph n))
+let lnn_path_finding_fun _ =
+  LNN.get_path
+
+(** val lnn_ring_path_finding_fun : int -> path_finding_fun **)
+
+let lnn_ring_path_finding_fun =
+  LNNRing.get_path
+
+(** val grid_path_finding_fun : int -> int -> path_finding_fun **)
+
+let grid_path_finding_fun _ =
+  Grid.get_path
+
+(** val lnn_qubit_ordering_fun : int -> qubit_ordering_fun **)
+
+let lnn_qubit_ordering_fun =
+  LNN.q_ordering
+
+(** val lnn_ring_qubit_ordering_fun : int -> qubit_ordering_fun **)
+
+let lnn_ring_qubit_ordering_fun =
+  LNNRing.q_ordering
 
 (** val remove_swaps : circ -> layout -> FullGateSet.full_ucom_l **)
 
@@ -502,3 +541,38 @@ let check_swap_equivalence c1 c2 lay1 lay2 =
 
 let check_constraints c cg =
   check_constraints (FullGateSet.full_to_map c) (is_in_graph cg)
+
+(** val optimize_and_map_to_lnn_ring_16 : circ -> circ option **)
+
+let optimize_and_map_to_lnn_ring_16 c =
+  let cg =
+    make_lnn_ring (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ 0))))))))))))))))
+  in
+  let get_path0 =
+    lnn_ring_path_finding_fun (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ 0))))))))))))))))
+  in
+  let q_ordering0 =
+    lnn_ring_qubit_ordering_fun (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+      (Pervasives.succ (Pervasives.succ 0))))))))))))))))
+  in
+  if check_well_typed c (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ (Pervasives.succ (Pervasives.succ (Pervasives.succ
+       (Pervasives.succ 0))))))))))))))))
+  then let c1 = optimize_nam c in
+       let lay = greedy_layout c cg q_ordering0 in
+       let c2 = swap_route c1 lay cg get_path0 in
+       let c3 = decompose_swaps c2 cg in Some (optimize c3)
+  else None

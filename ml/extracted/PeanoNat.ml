@@ -18,6 +18,18 @@ module Nat =
       (fun p -> add m (mul p m))
       n
 
+  (** val sub : int -> int -> int **)
+
+  let rec sub n m =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> n)
+      (fun k ->
+      (fun fO fS n -> if n=0 then fO () else fS (n-1))
+        (fun _ -> n)
+        (fun l -> sub k l)
+        m)
+      n
+
   (** val ltb : int -> int -> bool **)
 
   let ltb n m =
@@ -53,5 +65,13 @@ module Nat =
     (fun fO fS n -> if n=0 then fO () else fS (n-1))
       (fun _ -> y)
       (fun y' -> fst (divmod x y' 0 y'))
+      y
+
+  (** val modulo : int -> int -> int **)
+
+  let modulo x y =
+    (fun fO fS n -> if n=0 then fO () else fS (n-1))
+      (fun _ -> x)
+      (fun y' -> sub y' (snd (divmod x y' 0 y')))
       y
  end

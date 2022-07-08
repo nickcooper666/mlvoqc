@@ -47,7 +47,9 @@ let rec build_layout l alloc lay q_ordering =
                 build_layout t0 alloc' lay' q_ordering
               | None ->
                 let m_phys = get_fresh_qubit (q_ordering None) alloc in
-                let n_phys = get_fresh_qubit (q_ordering (Some m_phys)) alloc
+                let n_phys =
+                  get_fresh_qubit (q_ordering (Some m_phys))
+                    (FSet.add m_phys alloc)
                 in
                 let alloc' = FSet.add n_phys (FSet.add m_phys alloc) in
                 let lay' = add (add lay m m_phys) n n_phys in
@@ -55,18 +57,17 @@ let rec build_layout l alloc lay q_ordering =
         | _ -> build_layout t0 alloc lay q_ordering)
      | _ -> build_layout t0 alloc lay q_ordering)
 
-(** val extend_layout :
-    int -> FSet.t -> layout -> (int option -> int list) -> layout **)
+(** val extend_layout : int -> FSet.t -> layout -> int list -> layout **)
 
-let rec extend_layout n alloc lay q_ordering =
+let rec extend_layout n alloc lay prefs =
   (fun fO fS n -> if n=0 then fO () else fS (n-1))
     (fun _ -> lay)
     (fun n' ->
     match find_phys lay n' with
-    | Some _ -> extend_layout n' alloc lay q_ordering
+    | Some _ -> extend_layout n' alloc lay prefs
     | None ->
-      let m = get_fresh_qubit (q_ordering None) alloc in
-      extend_layout n' (FSet.add m alloc) (add lay n' m) q_ordering)
+      let m = get_fresh_qubit prefs alloc in
+      extend_layout n' (FSet.add m alloc) (add lay n' m) prefs)
     n
 
 (** val greedy_layout :
@@ -74,4 +75,4 @@ let rec extend_layout n alloc lay q_ordering =
 
 let greedy_layout l n q_ordering =
   let (alloc, lay) = build_layout l FSet.empty empty q_ordering in
-  extend_layout n alloc lay q_ordering
+  extend_layout n alloc lay (q_ordering None)

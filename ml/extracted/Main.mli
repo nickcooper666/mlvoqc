@@ -5,8 +5,8 @@ open UnitaryListRepresentation
 
 (** VOQC contains utilities for optimizing quantum circuits and mapping them
    to a connectivity graph. VOQC was first presented at POPL 2021. The extended
-   version of the paper is available {{:https://arxiv.org/abs/1912.02250}here}.
-   In the remainder of this document we will refer to this paper as "POPL VOQC". *)
+   version of the POPLpaper is available {{:https://arxiv.org/abs/1912.02250}here}.
+   In the remainder of this document we refer to this paper as "POPL VOQC". *)
 
 (** This file lists the functions we provide in VOQC, as well as properties we 
    have verified about them. In general, our goal is to prove that VOQC circuit 
@@ -25,7 +25,7 @@ open UnitaryListRepresentation
 {ul {- {i (WT) } -- We include the annotation (WT) to indicate that a transformation 
    preserves semantics provided that the input circuit is well-typed. A circuit is 
    "well-typed" for some dimension (i.e. number of qubits) d if every gate in the 
-   circuit applies to some qubit less than d and no gate has duplicate arguments. 
+   circuit applies to qubit(s) less than d and no gate has duplicate arguments. 
    Some optimizations do not preserve semantics when the input is ill-typed because 
    they can produce a well-typed circuit from an ill-typed input. In Coq, this 
    requirement is written as [ forall c, well_typed c -> [[opt c]] = [[c]]].}
@@ -38,7 +38,7 @@ open UnitaryListRepresentation
 {- {i (perm) } -- We include the annotation (perm) to indicate that the semantics are preserved 
    up to a permutation of qubits. This will be the case after applying circuit mapping. 
    In Coq, for permutation matrices P1 and P2, this variation is written as  
-   [ forall c, [[c]] = P1 x [[opt c]] x P2].}}
+   [ forall c, exists P1 P2, [[c]] = P1 x [[opt c]] x P2].}}
 - {i Preserves WT} -- This property says that if the input circuit is well-typed, 
    then the output circuit will also be well-typed. In our semantics, the denotation of 
    a well-typed circuit is a unitary matrix while the denotation of an ill-typed circuit 
@@ -68,16 +68,33 @@ type circ = FullGateSet.coq_Full_Unitary gate_list
    and physical qubits back to logical qubits. A layout is {i well-formed} if 
    these two functions accurately represent a bijection and its inverse.
    
-   You can construct a layout using the function [list_to_layout]. *)
+   You can construct a layout using the functions [list_to_layout], [trivial_layout],
+   or [greedy_layout]. *)
 type layout
 
-(** A {i connectivity graph} ([c_graph]) is a apr [ nat * (nat -> nat -> bool)], 
+(** A {i connectivity graph} ([c_graph]) is a pair [ nat * (nat -> nat -> bool)], 
    that consists of the total number of qubits in the system and a an oracle that 
    indicates whether a directed edge exists between two qubits.
    
-   You can construct a connectivity graph using [make_tenerife], [make_lnn], [make_lnn_ring],
+   You can construct a connectivity graph using [make_lnn], [make_lnn_ring],
    or [make_grid]. *)
 type c_graph
+
+(** A [path_finding_fun] is a function [ nat -> nat -> nat list ] that produces
+   an undirected path between any two nodes in a graph. It is used for circuit
+   mapping.
+   
+   You can construct an object of this type using [lnn_path_finding_fun], 
+   [lnn_ring_path_finding_fun], or [grid_path_finding_fun]. *)
+type path_finding_fun
+
+(** A [qubit_ordering_fun] is a function [ nat option -> nat list ] that produces
+   an ordering of all qubits in the system, excluding its optional argument. 
+   It is used for ranking pysical qubits when generating layouts.
+   
+   You can construct an object of this type using [lnn_qubit_ordering_fun] or
+   [lnn_ring_qubit_ordering_fun]. *)
+type qubit_ordering_fun
 
 (** {1 API} *)
 
@@ -197,7 +214,7 @@ val cancel_two_qubit_gates : circ -> circ
 val merge_rotations : circ -> circ
 
 (** Run optimizations in the order 0, 1, 3, 2, 3, 1, 2, 4, 3, 2 where 0 is [not_propagation], 
-   1 [hadamard_reduction], 2 is [cancel_single_qubit_gates], 3 is [cancel_two_qubit_gates], 
+   1 is [hadamard_reduction], 2 is [cancel_single_qubit_gates], 3 is [cancel_two_qubit_gates], 
    and 4 is [merge_rotations] (see VOQC POPL Sec 4.6).
   
    {i Verified Properties:} Preserves semantics (WT, phase), preserves WT, preserves mapping *)
@@ -233,14 +250,15 @@ val optimize : circ -> circ
     using the dimension stored in the input graph and the input layout and graph 
     are well-formed, this transformation preserves semantics (WT, perm) and preserves WT. 
     Furthermore, the output [c] respects the (undirected) constraints of the input graph. *)
-val swap_route : circ -> layout -> c_graph -> (int -> int -> int list) -> circ
+val swap_route : circ -> layout -> c_graph -> path_finding_fun -> circ
 
 (** Decompose swap gates and reorient cnot gates to satisfy connectivity constraints.
     
     {i Verified properties:} Provided that that the input circuit is well-typed 
     using the dimension stored in the input graph, this transformation preserves 
-    semantics (WT) and preserves WT. Furthermore, the output respects the constraints 
-    of the input graph. *)
+    semantics and preserves WT. Furthermore, if the input circuit restpects the 
+    (undirected) constraints of the graph, then the output respects the (directed)
+    constraints. *)
 val decompose_swaps : circ -> c_graph -> circ
 
 (** Create a trivial layout on n qubits (i.e. logical qubit i is mapped to physical qubit i).
@@ -273,26 +291,44 @@ val layout_to_list : layout -> int -> int list
    the architecture if they are used together in a two-qubit gate. 
    
    {i Verified Properties:} The output layout is well-formed. *)
-val greedy_layout : circ -> c_graph -> (int option -> int list) -> layout
+val greedy_layout : circ -> c_graph -> qubit_ordering_fun -> layout
 
-(** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)).
-    
-   {i Verified Properties:} The output connectivity graph is well-formed. *)
+(** Create a 1D LNN graph with n qubits (see POPL VOQC Fig 8(b)). *)
 val make_lnn : int -> c_graph
 
-(*
-(** Create a 1D LNN ring graph with n qubits (see POPL VOQC Fig 8(c)).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
+(** Create a 1D LNN ring graph with n qubits (see POPL VOQC Fig 8(c)). *)
 val make_lnn_ring : int -> c_graph
 
-(** Create a m x n 2D grid (see POPL VOQC Fig 8(d)).
-    
-    {i Verified Properties:} The output connectivity graph is well-formed. *)
+(** Create a m x n 2D grid (see POPL VOQC Fig 8(d)). *)
 val make_grid : int -> int -> c_graph
-*)
 
+(** Create a connectivity graph from a list of pairs describing edges in the graph. *)
 val c_graph_from_coupling_map : int -> (int * int) list -> c_graph
+
+(** Get a function to find paths in a 1D LNN graph.
+    
+    {i Verified Properties:} The function returns valid paths. *)
+val lnn_path_finding_fun : int -> path_finding_fun
+
+(** Get a function to find paths in a 1D LNN ring graph.
+    
+    {i Verified Properties:} The function returns valid paths. *)
+val lnn_ring_path_finding_fun : int -> path_finding_fun
+
+(** Get a function to find paths in a 2D grid.
+    
+    {i Verified Properties:} The function returns valid paths. *)
+val grid_path_finding_fun : int -> int -> path_finding_fun
+
+(** Generate a preference-ordering function for qubits in a 1D LNN graph.
+    
+    {i Verified Properties:} The ordering function is valid. *)
+val lnn_qubit_ordering_fun : int -> qubit_ordering_fun
+
+(** Generate a preference-ordering function for qubits in a 1D LNN ring graph.
+    
+    {i Verified Properties:} The ordering function is valid. *)
+val lnn_ring_qubit_ordering_fun : int -> qubit_ordering_fun
 
 (** Remove all swap gates from a program, instead performing a logical relabeling 
    of qubits. 
@@ -305,8 +341,9 @@ val remove_swaps : circ -> layout -> circ
 (** Check if two programs (and their initial layouts) are equivalent up to inserted
    swaps gates. This function can be used to validate circuit routing routines. 
    
-   {i Verified Properties:} If this function returns true, the programs are equivalent
-   up to a permutation of qubits.  *)
+   {i Verified Properties:} Assuming the input circuits are well-typed and the input
+   layouts are well formed, if this function returns true then the programs are
+   equivalent up to a permutation of qubits.  *)
 val check_swap_equivalence : circ -> circ -> layout -> layout -> bool
 
 (** Check if a circuit satisfies the constraints of a connectivity graph.
@@ -315,3 +352,9 @@ val check_swap_equivalence : circ -> circ -> layout -> layout -> bool
    the constraints of the connectivity graph. *)
 val check_constraints : circ -> c_graph -> bool
 
+(** Example composition of transformations. Applies [optimize_nam], followed by
+   [swap_route] using the 16-qubit LNN ring architecture, followed by [optimize].
+
+   {i Verified Properties:} If this function returns [Some c], then it preserves semantics
+   (WT, phase) and [c] respects the (directed) constraints of the LNN ring graph. *)
+val optimize_and_map_to_lnn_ring_16 : circ -> circ option

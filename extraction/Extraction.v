@@ -327,20 +327,72 @@ Extraction Implicit Main.greedy_layout [dim].
 Extraction Implicit Main.remove_swaps [dim].
 Extraction Implicit Main.check_swap_equivalence [dim].
 Extraction Implicit Main.check_constraints [dim].
+Extraction Implicit Main.optimize_and_map_to_lnn_ring_16 [dim].
 
 (* Perform extraction. *)
 Separate Extraction
-  ConnectivityGraph.LNN
-  UnitaryListRepresentation.last_single_qubit_gate Main.check_well_typed 
-  Main.convert_to_ibm Main.convert_to_rzq Main.replace_rzq Main.decompose_to_cnot 
-  Main.count_1q Main.count_2q Main.count_3q Main.count_total Main.count_rzq_clifford 
-  Main.count_I Main.count_X Main.count_Y Main.count_Z Main.count_H Main.count_S
-  Main.count_T Main.count_Sdg Main.count_Tdg count_Rx count_Ry count_Rz count_Rzq
-  count_U1 count_U2 count_U3 count_CX count_CZ count_SWAP count_CCX count_CCZ
-  Main.optimize_ibm Main.not_propagation Main.hadamard_reduction 
-  Main.cancel_single_qubit_gates Main.cancel_two_qubit_gates Main.merge_rotations
-  Main.optimize_nam Main.optimize_nam_light Main.optimize_nam_lcr Main.optimize
-  Main.swap_route Main.decompose_swaps Main.trivial_layout Main.layout_to_list
-  Main.list_to_layout Main.greedy_layout Main.make_lnn Main.remove_swaps 
-  Main.check_list Main.check_swap_equivalence Main.check_constraints
-  Main.c_graph_from_coupling_map.
+  (*ConnectivityGraph.LNN
+  ConnectivityGraph.LNNRing
+  ConnectivityGraph.Grid*)
+  UnitaryListRepresentation.last_single_qubit_gate 
+  Main.check_well_typed 
+  Main.convert_to_ibm 
+  Main.convert_to_rzq 
+  Main.replace_rzq 
+  Main.decompose_to_cnot 
+  Main.count_1q 
+  Main.count_2q 
+  Main.count_3q 
+  Main.count_total 
+  Main.count_rzq_clifford 
+  Main.count_I 
+  Main.count_X 
+  Main.count_Y 
+  Main.count_Z 
+  Main.count_H 
+  Main.count_S
+  Main.count_T 
+  Main.count_Sdg 
+  Main.count_Tdg 
+  count_Rx 
+  count_Ry 
+  count_Rz 
+  count_Rzq
+  count_U1 
+  count_U2 
+  count_U3 
+  count_CX 
+  count_CZ 
+  count_SWAP 
+  count_CCX 
+  count_CCZ
+  Main.optimize_ibm 
+  Main.not_propagation 
+  Main.hadamard_reduction 
+  Main.cancel_single_qubit_gates 
+  Main.cancel_two_qubit_gates 
+  Main.merge_rotations
+  Main.optimize_nam 
+  Main.optimize_nam_light 
+  Main.optimize_nam_lcr 
+  Main.optimize
+  Main.swap_route 
+  Main.decompose_swaps 
+  Main.trivial_layout 
+  Main.layout_to_list
+  Main.list_to_layout 
+  Main.greedy_layout 
+  Main.make_lnn 
+  Main.make_lnn_ring
+  Main.make_grid
+  Main.lnn_path_finding_fun
+  Main.lnn_ring_path_finding_fun
+  Main.grid_path_finding_fun
+  Main.lnn_qubit_ordering_fun
+  Main.lnn_ring_qubit_ordering_fun
+  Main.remove_swaps 
+  Main.check_list 
+  Main.check_swap_equivalence 
+  Main.check_constraints
+  Main.c_graph_from_coupling_map
+  Main.optimize_and_map_to_lnn_ring_16.

@@ -44,7 +44,9 @@ opam install voqc
 
 Once you have the VOQC library installed, you can build the example program with `make example`.
 
-*Note*: When building the VOQC executable on a Mac, you will likely see the warning `ld: warning: directory not found for option '-L/opt/local/lib'`. This is due to zarith (see [ocaml/opam-repository#3000](https://github.com/ocaml/opam-repository/issues/3000)) and seems to be fine to ignore.
+*Notes*: 
+* When building the VOQC executable on a Mac, you will likely see the warning `ld: warning: directory not found for option '-L/opt/local/lib'`. This is due to zarith (see [ocaml/opam-repository#3000](https://github.com/ocaml/opam-repository/issues/3000)) and seems to be fine to ignore.
+* If you decide to build mlvoqc locally (using `make install`) instead of through opam, you will need to install the OCaml OpenQASM parser (`opam install openQASM`).
 
 ## Usage
 

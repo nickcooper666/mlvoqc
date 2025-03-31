@@ -13,7 +13,6 @@
  (name voqc)
  (synopsis "A verified optimizer for quantum circuits (VOQC)")
  (description "OCaml library for VOQC, a Verified Optimizer for Quantum Circuits")
- (depends
-  (ocaml (>= 4.08))
-  openQASM
-  zarith (>= 1.5)))
+ (depends ocaml>=4.08)
+ (depends openQASM)
+ (depends zarith>=1.5))
